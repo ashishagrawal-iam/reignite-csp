@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wiom MBG — Internal Reference & Simulator</title>
+<style>
+  :root{
+    --magenta:#D9008D; --ink:#1A1A1A; --ink-2:#6B6B66; --ink-3:#9A9A93;
+    --page:#FAFAF7; --card:#FFFFFF; --line:#EAE7DF; --line-2:#D8D4CA;
+    --green:#0F7A52; --green-soft:#E4F4EC;
+    --red:#C0392B; --red-soft:#FBEBE9;
+    --amber:#9A6A0A; --amber-soft:#F8EFDC;
+    --blue:#1763B6; --blue-soft:#E8F1FB;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--page); color:var(--ink); font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif; line-height:1.6; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:860px; margin:0 auto; padding:28px 20px 64px;}
+  .eyebrow{font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); margin:0 0 8px;}
+  h1{font-size:28px; line-height:1.2; font-weight:600; margin:0 0 10px;}
+  h2{font-size:19px; font-weight:600; margin:0 0 4px;}
+  .sub{color:var(--ink-2); font-size:14px;}
+  .tag{display:inline-block; font-size:11px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:#fff; background:var(--magenta); padding:3px 10px; border-radius:6px; margin-bottom:14px;}
+  .hero{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:22px 24px; margin-bottom:24px;}
+  .hero p{margin:8px 0 0; font-size:15px; color:var(--ink-2);}
+
+  .spec{width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; font-size:14px;}
+  .spec td{padding:10px 16px; border-bottom:1px solid var(--line); vertical-align:top;}
+  .spec tr:last-child td{border-bottom:none;}
+  .spec td:first-child{color:var(--ink-2); width:34%; white-space:nowrap;}
+  .spec td:last-child{font-weight:500;}
+  .spec b{color:var(--magenta); font-weight:600;}
+
+  .section{margin:34px 0 0;}
+  .section-head{margin-bottom:14px;}
+
+  .calc{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:22px 24px;}
+  .presets{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:22px;}
+  .preset{border:1px solid var(--line-2); background:transparent; color:var(--ink); border-radius:999px; padding:7px 14px; font-size:13px; cursor:pointer; font-family:inherit; transition:all .15s ease;}
+  .preset:hover{border-color:var(--magenta); color:var(--magenta);}
+  .preset.active{background:var(--magenta); border-color:var(--magenta); color:#fff;}
+  .lever{margin-bottom:20px;}
+  .lever-top{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;}
+  .lever-top label{font-size:14px; font-weight:600;}
+  .lever-top label span{font-weight:400; color:var(--ink-2); font-size:13px;}
+  .lever-val{font-size:26px; font-weight:600; color:var(--magenta); min-width:42px; text-align:right;}
+  input[type=range]{-webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:3px; background:var(--line); outline:none; cursor:pointer;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; appearance:none; width:24px; height:24px; border-radius:50%; background:var(--magenta); border:3px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,.2); cursor:pointer;}
+  input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; background:var(--magenta); border:3px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,.2); cursor:pointer;}
+  .gate-wrap{margin:6px 0 24px;}
+  .gate-top{display:flex; justify-content:space-between; font-size:13px; color:var(--ink-2); margin-bottom:6px;}
+  .gate-track{position:relative; height:12px; background:var(--line); border-radius:6px;}
+  .gate-fill{position:absolute; left:0; top:0; bottom:0; border-radius:6px; transition:width .25s ease, background .25s ease; width:0%;}
+  .gate-mark{position:absolute; left:70%; top:-5px; bottom:-5px; width:2px; background:var(--ink);}
+  .gate-mark::after{content:"70%"; position:absolute; top:-19px; left:50%; transform:translateX(-50%); font-size:11px; color:var(--ink-2); white-space:nowrap;}
+  .out{display:grid; grid-template-columns:1.1fr 1fr; gap:18px;}
+  @media(max-width:560px){.out{grid-template-columns:1fr;}}
+  .breakdown{border:1px solid var(--line); border-radius:12px; padding:16px 18px; background:var(--page);}
+  .brow{display:flex; justify-content:space-between; font-size:14px; padding:6px 0;}
+  .brow .lbl{color:var(--ink-2);}
+  .brow.topup .val{color:var(--blue); font-weight:600;}
+  .brow.total{border-top:1px dashed var(--line-2); margin-top:8px; padding-top:12px;}
+  .brow.total .lbl{font-weight:600; color:var(--ink);}
+  .total-num{font-size:34px; font-weight:700; line-height:1; margin-top:2px;}
+  .status{border-radius:12px; padding:16px 18px;}
+  .status .badge{font-size:12px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; margin-bottom:8px;}
+  .status .why{font-size:14px; line-height:1.55;}
+  .s-green{background:var(--green-soft);} .s-green .badge{color:var(--green);}
+  .s-blue{background:var(--blue-soft);} .s-blue .badge{color:var(--blue);}
+  .s-red{background:var(--red-soft);} .s-red .badge{color:var(--red);}
+  .s-amber{background:var(--amber-soft);} .s-amber .badge{color:var(--amber);}
+  .nudge{margin-top:10px; font-size:13px; padding:8px 10px; background:#fff; border:1px dashed var(--line-2); border-radius:8px;}
+
+  .hist{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:22px 24px;}
+  .bars{display:flex; align-items:flex-end; gap:10px; height:180px; margin:18px 0 6px;}
+  .bar-col{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%;}
+  .bar{width:100%; border-radius:5px 5px 0 0; transition:height .4s ease; position:relative;}
+  .bar .cnt{position:absolute; top:-18px; left:0; right:0; text-align:center; font-size:12px; color:var(--ink-2);}
+  .bar-lbl{font-size:11px; color:var(--ink-3); margin-top:7px; text-align:center;}
+  .legend{display:flex; flex-wrap:wrap; gap:16px; margin-top:14px; font-size:12px; color:var(--ink-2);}
+  .legend i{display:inline-block; width:11px; height:11px; border-radius:3px; margin-right:5px; vertical-align:-1px;}
+  .flag{margin-top:14px; font-size:13px; background:var(--red-soft); color:var(--red); padding:10px 13px; border-radius:10px;}
+
+  .watch{display:flex; flex-direction:column; gap:10px;}
+  .witem{background:var(--card); border:1px solid var(--line); border-left:3px solid var(--magenta); border-radius:10px; padding:13px 16px;}
+  .witem-open{border-left-color:var(--amber);}
+  .witem h3{font-size:14px; font-weight:600; margin:0 0 3px;}
+  .witem p{font-size:13px; color:var(--ink-2); margin:0;}
+  .pill{display:inline-block; font-size:11px; font-weight:600; padding:2px 8px; border-radius:5px; margin-left:8px; vertical-align:1px;}
+  .pill-risk{background:var(--red-soft); color:var(--red);}
+  .pill-open{background:var(--amber-soft); color:var(--amber);}
+
+  .fine{margin-top:28px; font-size:12px; color:var(--ink-3); border-top:1px solid var(--line); padding-top:14px;}
+  @media(prefers-reduced-motion:reduce){*{transition:none !important;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <span class="tag">Internal — not for CSP distribution</span>
+  <div class="hero">
+    <p class="eyebrow">Wiom · Minimum Business Guarantee · Jul–Sep 2026</p>
+    <h1>MBG program — internal reference and mechanism simulator</h1>
+    <p>Supply-side cold-start intervention. Compact + guarantee igniter for shortlisted, signed CSPs. This sheet holds the locked payout spec, a live mechanism simulator, the current rate distribution, and the open items to resolve before payout settlement.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><h2>Locked payout rules (v1)</h2><p class="sub">Single source of truth. Every example and dashboard tile derives from this.</p></div>
+    <table class="spec">
+      <tr><td>Window</td><td>3 calendar months, <b>1 Jul – 30 Sep 2026</b>. Per calendar month, not rolling.</td></tr>
+      <tr><td>Per install</td><td><b>₹300</b>, paid on connection successfully completed (not on recharge — recharge is Wiom's).</td></tr>
+      <tr><td>MBG floor</td><td><b>₹5,000 / month</b> per signed CSP. Pro-rated for mid-month signups.</td></tr>
+      <tr><td>Cohort basis</td><td>Denominator = leads by <b>assignment date</b> in the month. Numerator = installs from those leads.</td></tr>
+      <tr><td>Maturity</td><td>Lead resolves to install/cancel within <b>14 days</b> of assignment; beyond that = system cancellation = counts as non-install.</td></tr>
+      <tr><td>Rate gate</td><td><b>≥70%</b> install rate to qualify — hard cliff (69% = ₹0 make-good).</td></tr>
+      <tr><td>Volume floor</td><td>MBG applies only if <b>assigned leads ≥ 3</b> in the month.</td></tr>
+      <tr><td>Top-up</td><td>If qualified: top-up = max(0, ₹5,000 − ₹300×installs). If ₹300×installs ≥ ₹5,000 → auto-met.</td></tr>
+      <tr><td>Worst-case burn</td><td>333 × ₹5,000 × 3 = <b>₹50L</b> — the ₹50L ceiling is the all-floor-out case.</td></tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><h2>Mechanism simulator</h2><p class="sub">Drive bookings and installs to inspect every payout state and the cliff behaviour. Use the presets to demo the four canonical cases.</p></div>
+    <div class="calc">
+      <div class="presets" id="presets">
+        <button class="preset" data-b="24" data-i="18">A — auto-met</button>
+        <button class="preset" data-b="10" data-i="8">B — top-up</button>
+        <button class="preset" data-b="10" data-i="6">C — cliff miss</button>
+        <button class="preset" data-b="2" data-i="2">D — &lt;3 leads (N/A)</button>
+      </div>
+      <div class="lever">
+        <div class="lever-top"><label>Bookings assigned <span>(assignment-date cohort)</span></label><span class="lever-val" id="bVal">10</span></div>
+        <input type="range" id="bookings" min="0" max="30" step="1" value="10">
+      </div>
+      <div class="lever">
+        <div class="lever-top"><label>Installs completed <span>(capped at bookings)</span></label><span class="lever-val" id="iVal">8</span></div>
+        <input type="range" id="installs" min="0" max="30" step="1" value="8">
+      </div>
+      <div class="gate-wrap">
+        <div class="gate-top"><span>Install rate</span><span id="rateTxt">80%</span></div>
+        <div class="gate-track"><div class="gate-fill" id="gateFill"></div><div class="gate-mark"></div></div>
+      </div>
+      <div class="out">
+        <div class="breakdown">
+          <div class="brow"><span class="lbl">Install pay (₹300 × <span id="bdInstalls">8</span>)</span><span class="val" id="bdPay">₹2,400</span></div>
+          <div class="brow topup" id="bdTopupRow"><span class="lbl">Make-good top-up</span><span class="val" id="bdTopup">₹2,600</span></div>
+          <div class="brow total"><span class="lbl">Total payout</span><span></span></div>
+          <div class="total-num" id="bdTotal">₹5,000</div>
+        </div>
+        <div class="status s-blue" id="status">
+          <div class="badge" id="stBadge">Top-up</div>
+          <div class="why" id="stWhy"></div>
+          <div class="nudge" id="stNudge" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><h2>Current install-rate distribution</h2><p class="sub">All signed CSPs by install rate (sample data). The 60–69% bucket is the near-miss cohort — every one is a ₹0 make-good under the cliff.</p></div>
+    <div class="hist">
+      <div class="bars" id="bars"></div>
+      <div class="legend">
+        <span><i style="background:var(--line-2);"></i>Below 60%</span>
+        <span><i style="background:#E89A9A;"></i>Near-miss (60–69%)</span>
+        <span><i style="background:#6FBF9A;"></i>Clears gate (70%+)</span>
+      </div>
+      <div class="flag">28 CSPs sit at 60–69% — just below the cliff. Each is a ₹0 top-up <b>and</b> a backlash risk. Targeting these with the "one more install" nudge is the cheapest density you can buy.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><h2>Watch list — resolve before settlement</h2><p class="sub">Risks the mechanism carries and open decisions still needed from leadership.</p></div>
+    <div class="watch">
+      <div class="witem"><h3>Cliff is a comms landmine <span class="pill pill-risk">risk</span></h3><p>Case C (60% rate) earns 36% of Case B's payout for 60% of the work. Correct by design, but explosive when it hits a CSP's wallet. The near-miss nudge is the mitigation; show the cliff with eyes open, don't hide it.</p></div>
+      <div class="witem"><h3>Incremental value not yet provable <span class="pill pill-risk">risk</span></h3><p>Dashboards prove spend and installs landed. They cannot yet prove installs were incremental (vs would-have-happened-anyway). Needs an untreated-network baseline wired before the Sep read, or burn answers "what we spent" but not "was it worth it."</p></div>
+      <div class="witem"><h3>Demand dependency <span class="pill pill-risk">risk</span></h3><p>Density vs L* is the live constraint. The compact commits lead volume the demand team must actually deliver — a per-cluster commitment in writing should precede any signed compact, or every weak Sep result becomes a "wasn't our fault" debate.</p></div>
+      <div class="witem witem-open"><h3>Payout timing <span class="pill pill-open">open</span></h3><p>Cohort fully settles ~14 days after month-end (maturity tail). Confirm payouts are pushed by 14 days post-month.</p></div>
+      <div class="witem witem-open"><h3>Pro-ration basis <span class="pill pill-open">open</span></h3><p>Defaulting to ₹5,000 × remaining-days / days-in-month for mid-month signups. The ≥3-lead floor is held fixed (not pro-rated). This simulator assumes a full month — confirm both. </p></div>
+      <div class="witem witem-open"><h3>Gate boundary <span class="pill pill-open">open</span></h3><p>Encoded as ≥70% (7/10 qualifies, 6/10 does not). Confirm "≥" not ">".</p></div>
+    </div>
+  </div>
+
+  <p class="fine">Sample numbers are illustrative. Burn, distribution, and density figures must be sourced from Snowflake before any leadership decision. Lead maturity = 14 days; month = calendar month; settlement ~14 days post-month.</p>
+
+</div>
+
+<script>
+(function(){
+  var FLOOR=5000, RATE_PER=300, GATE=0.70, MIN_LEADS=3;
+  var bookings=document.getElementById('bookings'), installs=document.getElementById('installs');
+  var bVal=document.getElementById('bVal'), iVal=document.getElementById('iVal');
+  var inr=function(n){return '₹'+Math.round(n).toLocaleString('en-IN');};
+  function compute(b,i){
+    var pay=RATE_PER*i, rate=b>0?i/b:0, eligible=b>=MIN_LEADS, qualified=eligible&&rate>=GATE;
+    var topup=qualified?Math.max(0,FLOOR-pay):0, status;
+    if(!eligible)status='mbg_na'; else if(!qualified)status='not_qualifying';
+    else if(pay>=FLOOR)status='auto_met'; else status='top_up';
+    return {pay:pay,rate:rate,eligible:eligible,qualified:qualified,topup:topup,total:pay+topup,status:status};
+  }
+  function render(){
+    var b=+bookings.value; installs.max=b; if(+installs.value>b)installs.value=b; var i=+installs.value;
+    bVal.textContent=b; iVal.textContent=i;
+    var c=compute(b,i), rp=Math.round(c.rate*100);
+    var fill=document.getElementById('gateFill');
+    fill.style.width=Math.min(100,rp)+'%'; document.getElementById('rateTxt').textContent=rp+'%';
+    fill.style.background=(c.eligible&&c.rate>=GATE)?'var(--green)':(c.eligible?'var(--red)':'var(--amber)');
+    document.getElementById('bdInstalls').textContent=i; document.getElementById('bdPay').textContent=inr(c.pay);
+    var tr=document.getElementById('bdTopupRow');
+    if(c.topup>0){tr.style.display='flex'; document.getElementById('bdTopup').textContent='+ '+inr(c.topup);} else tr.style.display='none';
+    document.getElementById('bdTotal').textContent=inr(c.total);
+    var st=document.getElementById('status'), badge=document.getElementById('stBadge'), why=document.getElementById('stWhy'), nudge=document.getElementById('stNudge');
+    st.className='status'; nudge.style.display='none';
+    if(c.status==='mbg_na'){
+      st.classList.add('s-amber'); badge.textContent='MBG not applicable'; document.getElementById('bdTotal').style.color='var(--amber)';
+      why.innerHTML='Only <b>'+b+'</b> lead(s) assigned. MBG needs <b>≥3</b>. CSP receives install pay only: ₹300 × '+i+' = <b>'+inr(c.pay)+'</b>. Low-volume signal — escalate cluster to demand team.';
+    } else if(c.status==='not_qualifying'){
+      st.classList.add('s-red'); badge.textContent='Below gate — no make-good'; document.getElementById('bdTotal').style.color='var(--red)';
+      why.innerHTML='<b>'+i+'</b> installs / <b>'+b+'</b> assigned = <b>'+rp+'%</b>, below the 70% gate. No top-up. Install pay only: <b>'+inr(c.pay)+'</b>.';
+      var need=Math.ceil(GATE*b)-i;
+      if(need>0&&need<=(b-i)){var c2=compute(b,i+need); nudge.style.display='block';
+        nudge.innerHTML='Targeting: <b>'+need+' more install(s)</b> crosses 70% ('+(i+need)+'/'+b+') → unlocks <b>'+inr(c2.topup)+'</b> top-up, total <b>'+inr(c2.total)+'</b>. Cheapest density available.';}
+    } else if(c.status==='top_up'){
+      st.classList.add('s-blue'); badge.textContent='Make-good top-up'; document.getElementById('bdTotal').style.color='var(--blue)';
+      why.innerHTML='<b>'+i+'</b> installs / <b>'+b+'</b> assigned = <b>'+rp+'%</b> — clears gate. Install pay <b>'+inr(c.pay)+'</b> is below ₹5,000, so Wiom tops up <b>'+inr(c.topup)+'</b> to the ₹5,000 floor.';
+    } else {
+      st.classList.add('s-green'); badge.textContent='Above guarantee'; document.getElementById('bdTotal').style.color='var(--green)';
+      why.innerHTML='<b>'+i+'</b> installs / <b>'+b+'</b> assigned = <b>'+rp+'%</b> — clears gate. Install pay <b>'+inr(c.pay)+'</b> exceeds ₹5,000 floor; no top-up. Full <b>'+inr(c.pay)+'</b> to CSP.';
+    }
+    document.querySelectorAll('.preset').forEach(function(p){p.classList.toggle('active',+p.dataset.b===b&&+p.dataset.i===i);});
+  }
+  bookings.addEventListener('input',render); installs.addEventListener('input',render);
+  document.querySelectorAll('.preset').forEach(function(p){p.addEventListener('click',function(){
+    bookings.value=p.dataset.b; installs.max=p.dataset.b; installs.value=p.dataset.i; render();});});
+
+  var dist=[{lbl:'0-39%',n:9,c:'var(--line-2)'},{lbl:'40-49%',n:14,c:'var(--line-2)'},{lbl:'50-59%',n:21,c:'var(--line-2)'},
+    {lbl:'60-69%',n:28,c:'#E89A9A'},{lbl:'70-79%',n:46,c:'#6FBF9A'},{lbl:'80-89%',n:52,c:'#6FBF9A'},{lbl:'90-100%',n:40,c:'#6FBF9A'}];
+  var maxN=Math.max.apply(null,dist.map(function(d){return d.n;})), bars=document.getElementById('bars');
+  dist.forEach(function(d){
+    var col=document.createElement('div'); col.className='bar-col';
+    var bar=document.createElement('div'); bar.className='bar'; bar.style.background=d.c; bar.style.height=(d.n/maxN*100)+'%';
+    bar.innerHTML='<span class="cnt">'+d.n+'</span>';
+    var lbl=document.createElement('div'); lbl.className='bar-lbl'; lbl.textContent=d.lbl;
+    col.appendChild(bar); col.appendChild(lbl); bars.appendChild(col);
+  });
+  render();
+})();
+</script>
+</body>
+</html>

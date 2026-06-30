@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OptIn V0 — कमाई कवच · Wiom CSP App</title>
+<style>
+  :root{
+    --magenta:#D9008D; --ink:#161021; --ink-2:#5C5570; --ink-3:#9A9A93;
+    --page:#FAFAF7; --card:#FFFFFF; --line:#EAE7DF; --line-2:#D8D4CA;
+    --green:#0F7A52; --green-soft:#E4F4EC;
+    --red:#C0392B; --red-soft:#FBEBE9;
+    --amber:#9A6A0A; --amber-soft:#F8EFDC;
+    --blue:#1763B6; --blue-soft:#E8F1FB;
+    --radius:14px;
+    /* Wiom tokens */
+    --w-brand:#D9008D; --w-brand-2:#B0006F; --w-brand-tint:#FFE5F6; --w-brand-stroke:#FFB2E4;
+    --w-secondary:#443152;
+    --w-screen:#FAF9FC; --w-bg:#E8E4F0; --w-surface:#FFFFFF;
+    --w-text:#161021; --w-text-2:#665E75; --w-text-3:#A7A1B2;
+    --w-stroke:#E8E4F0; --w-stroke-2:#D7D3E0;
+    --w-pos:#008043; --w-pos-bg:#E1FAED;
+    --w-neg:#D92130; --w-neg-bg:#FFE5E7;
+    --w-warn:#B85C00; --w-warn-bg:#FFE6CC;
+    --w-caution:#806000; --w-caution-bg:#FFF2BF;
+    --w-info:#6D17CE; --w-info-bg:#F1E5FF;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--page); color:var(--ink); font-family:"Segoe UI",system-ui,-apple-system,"Noto Sans",Roboto,sans-serif; line-height:1.6; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1180px; margin:0 auto; padding:32px 22px 80px;}
+  .hi{font-family:"Noto Sans Devanagari","Segoe UI",sans-serif;}
+  .eyebrow{font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); margin:0 0 8px;}
+  h1{font-size:30px; line-height:1.18; font-weight:700; margin:0 0 12px; letter-spacing:-.01em;}
+  h2{font-size:21px; font-weight:700; margin:0 0 6px;}
+  h3{font-size:15px; font-weight:700; margin:0 0 4px;}
+  .sub{color:var(--ink-2); font-size:15px;}
+  .tag{display:inline-block; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:#fff; background:var(--magenta); padding:4px 11px; border-radius:6px; margin-bottom:16px;}
+  .hero{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:26px 28px; margin-bottom:24px;}
+  .hero p{margin:10px 0 0; font-size:15px; color:var(--ink-2); max-width:82ch;}
+
+  .limits{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:20px 0 4px;}
+  @media(max-width:760px){.limits{grid-template-columns:1fr;}}
+  .limit{border:1px solid var(--line); border-radius:12px; padding:15px 17px; background:var(--page);}
+  .limit .lh{font-size:13px; font-weight:700; color:var(--magenta); margin-bottom:4px; display:flex; align-items:center; gap:7px;}
+  .limit p{font-size:13px; color:var(--ink-2); margin:0;}
+  .nope{border:1px dashed var(--line-2); border-radius:12px; padding:13px 16px; margin-top:14px; font-size:13px; color:var(--ink-2); background:#fff;}
+  .nope b{color:var(--ink);}
+
+  .principles{display:flex; flex-wrap:wrap; gap:10px; margin-top:18px;}
+  .pchip{font-size:12.5px; background:var(--page); border:1px solid var(--line-2); border-radius:999px; padding:6px 13px; color:var(--ink-2);}
+  .pchip b{color:var(--ink);}
+
+  .rail{display:flex; flex-wrap:wrap; gap:8px; margin:28px 0 8px;}
+  .rstep{flex:1 1 150px; background:var(--card); border:1px solid var(--line); border-top:3px solid var(--magenta); border-radius:10px; padding:11px 13px; min-width:140px; text-decoration:none; color:inherit;}
+  .rstep .n{font-size:11px; font-weight:700; color:var(--magenta); letter-spacing:.04em;}
+  .rstep .t{font-size:13.5px; font-weight:600; margin-top:2px; line-height:1.3;}
+  .rstep .c{font-size:11.5px; color:var(--ink-3); margin-top:3px;}
+  .rstep .s{display:inline-block; font-size:10px; font-weight:700; margin-top:5px; padding:1px 7px; border-radius:5px;}
+  .s-ct{background:var(--w-brand-tint); color:var(--w-brand);}
+  .s-bn{background:var(--blue-soft); color:var(--blue);}
+
+  .section{margin:46px 0 0; scroll-margin-top:20px;}
+  .section-head{margin-bottom:18px; border-bottom:1px solid var(--line); padding-bottom:12px;}
+  .section-head .kicker{font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--magenta); margin-bottom:4px;}
+
+  .stage{display:grid; grid-template-columns:1fr 360px; gap:34px; align-items:start; margin-bottom:10px;}
+  @media(max-width:880px){.stage{grid-template-columns:1fr;}}
+  .meta{display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 16px;}
+  .mtag{font-size:11.5px; padding:4px 10px; border-radius:6px; font-weight:600; border:1px solid var(--line-2);}
+  .mtag.trigger{background:#fff; color:var(--ink-2);}
+  .mtag.mct{background:var(--w-brand-tint); color:var(--w-brand); border-color:transparent;}
+  .mtag.bn{background:var(--blue-soft); color:var(--blue); border-color:transparent;}
+  .explain ul{margin:10px 0 0; padding-left:18px;}
+  .explain li{font-size:14px; color:var(--ink-2); margin-bottom:7px;}
+  .explain li b{color:var(--ink);}
+  .why{margin-top:14px; font-size:13px; padding:11px 13px; background:#fff; border:1px dashed var(--line-2); border-radius:9px; color:var(--ink-2);}
+  .why b{color:var(--magenta);}
+  .copybox{margin-top:14px; border:1px solid var(--line); border-radius:10px; overflow:hidden;}
+  .copybox .ch{font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-3); background:var(--page); padding:7px 12px; border-bottom:1px solid var(--line);}
+  .copyrow{display:grid; grid-template-columns:92px 1fr; border-bottom:1px solid var(--line);}
+  .copyrow:last-child{border-bottom:none;}
+  .copyrow .k{background:#fff; color:var(--ink-3); padding:8px 12px; font-size:11.5px; border-right:1px solid var(--line); font-weight:600;}
+  .copyrow .v{padding:8px 12px; font-size:13.5px;}
+  .copyrow .v .en{color:var(--ink-3); font-size:12px; display:block; margin-top:2px;}
+
+  /* phone */
+  .phone-wrap{position:sticky; top:18px;}
+  .phone{width:340px; border-radius:30px; background:#000; padding:9px; box-shadow:0 12px 34px rgba(22,16,33,.22); margin:0 auto;}
+  .screen{background:var(--w-screen); border-radius:23px; overflow:hidden; height:660px; display:flex; flex-direction:column; position:relative;}
+  .caption{text-align:center; font-size:12px; color:var(--ink-3); margin-top:10px;}
+  .w-header{background:var(--w-secondary); color:#fff; padding:14px 16px; display:flex; align-items:center; gap:12px; flex:none;}
+  .w-header .menu{font-size:18px; opacity:.9;} .w-header .title{font-size:16px; font-weight:600; flex:1;} .w-header .ic{font-size:16px; opacity:.85;}
+  .w-body{flex:1; overflow:hidden; position:relative;}
+  .w-scroll{padding:14px; height:100%; overflow:hidden;}
+
+  /* banner */
+  .w-banner{display:flex; border-radius:12px; overflow:hidden; margin-bottom:12px;}
+  .w-banner .accent{width:4px; flex:none;}
+  .w-banner .bbody{padding:11px 12px; display:flex; gap:9px; align-items:center; flex:1;}
+  .w-banner .bi{font-size:16px; flex:none;}
+  .w-banner .bt{font-size:12.5px; font-weight:600; line-height:1.4;}
+  .w-banner .bs{font-size:11.5px; line-height:1.4; margin-top:2px; opacity:.92;}
+  .w-banner .arr{opacity:.5; font-size:16px; padding-left:4px;}
+  .w-banner.info{background:var(--w-info-bg);} .w-banner.info .accent{background:var(--w-info);} .w-banner.info .bi,.w-banner.info .bt{color:var(--w-info);} .w-banner.info .bs{color:#4a2a86;}
+  .w-banner.ok{background:var(--w-pos-bg);} .w-banner.ok .accent{background:var(--w-pos);} .w-banner.ok .bi,.w-banner.ok .bt{color:var(--w-pos);} .w-banner.ok .bs{color:#0a5e32;}
+  .w-banner.brand{background:var(--w-brand-tint);} .w-banner.brand .accent{background:var(--w-brand);} .w-banner.brand .bi,.w-banner.brand .bt{color:var(--w-brand);} .w-banner.brand .bs{color:#8a0059;}
+  .w-banner.warn{background:var(--w-caution-bg);} .w-banner.warn .accent{background:var(--w-caution);} .w-banner.warn .bi,.w-banner.warn .bt{color:var(--w-caution);} .w-banner.warn .bs{color:#5e4a00;}
+
+  /* ghost home content (cannot change strip — show as-is, dimmed) */
+  .ghost{opacity:.45;}
+  .chip-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;}
+  .a-chip{background:#fff; border:1px solid var(--w-stroke); border-radius:8px; padding:11px; min-height:64px;}
+  .a-chip .lbl{font-size:10.5px; font-weight:600; color:var(--w-text-2);} .a-chip .val{font-size:18px; font-weight:700; color:var(--w-text); margin-top:2px;}
+  .task-card{background:#fff; border:1px solid var(--w-stroke); border-left:4px solid var(--w-text-3); border-radius:12px; padding:11px 12px; margin-bottom:9px;}
+  .task-card .tl1{font-size:12px; font-weight:600;} .task-card .tl2{font-size:11px; color:var(--w-text-2); margin-top:2px;}
+  .lockmini{font-size:10px; color:var(--w-text-3); text-transform:uppercase; letter-spacing:.04em; margin:2px 0 8px;}
+
+  /* CleverTap full-page interstitial */
+  .ct{position:absolute; inset:0; background:#fff; display:flex; flex-direction:column;}
+  .ct .ct-hero{background:linear-gradient(155deg,var(--w-brand),var(--w-brand-2)); color:#fff; padding:30px 22px 26px; position:relative; text-align:center;}
+  .ct .ct-x{position:absolute; top:12px; right:14px; color:#fff; opacity:.85; font-size:18px;}
+  .ct .ct-emoji{font-size:48px; line-height:1;}
+  .ct .ct-kick{font-size:11px; letter-spacing:.08em; text-transform:uppercase; opacity:.9; margin-top:12px;}
+  .ct .ct-title{font-size:22px; font-weight:700; line-height:1.25; margin-top:6px;}
+  .ct .ct-content{padding:20px 22px; flex:1; display:flex; flex-direction:column;}
+  .ct .ct-body{font-size:14px; color:var(--w-text-2); line-height:1.6;}
+  .ct .ct-highlight{background:var(--w-brand-tint); border-radius:14px; padding:14px 15px; margin:16px 0; text-align:center;}
+  .ct .ct-highlight .h-amt{font-size:26px; font-weight:700; color:var(--w-brand);}
+  .ct .ct-highlight .h-cap{font-size:12px; color:#8a0059; margin-top:2px;}
+  .ct .ct-list{margin:6px 0 0; padding:0; list-style:none;}
+  .ct .ct-list li{display:flex; gap:9px; font-size:13px; color:var(--w-text); margin-bottom:9px; align-items:flex-start;}
+  .ct .ct-list li b{color:var(--w-brand);}
+  .ct .ct-ctas{margin-top:auto; padding-top:14px;}
+  .w-cta{display:block; width:100%; text-align:center; background:var(--w-brand); color:#fff; font-size:14.5px; font-weight:700; padding:13px; border-radius:16px; border:none; margin-top:8px;}
+  .w-cta.sec{background:#fff; color:var(--w-brand); border:1.5px solid var(--w-brand);}
+  .w-cta.ghost{background:transparent; color:var(--w-text-2); font-weight:600;}
+
+  /* drilldown screen */
+  .dd-scroll{padding:14px; height:100%; overflow:hidden;}
+  .reassure{background:var(--w-brand-tint); border:1px solid var(--w-brand-stroke); border-radius:16px; padding:17px 16px; text-align:center; margin-bottom:13px;}
+  .reassure .r-ic{font-size:30px;}
+  .reassure .r-title{font-size:16px; font-weight:700; color:var(--w-brand); margin-top:6px; line-height:1.35;}
+  .reassure .r-body{font-size:12.5px; color:#7a1257; margin-top:7px; line-height:1.55;}
+  .reassure .r-date{display:inline-block; background:#fff; color:var(--w-brand); font-weight:700; font-size:13px; padding:5px 13px; border-radius:999px; margin-top:11px; border:1px solid var(--w-brand-stroke);}
+  .dd-card{background:#fff; border:1px solid var(--w-stroke); border-radius:14px; padding:14px; margin-bottom:11px;}
+  .dd-card .dt{font-size:12px; font-weight:700; color:var(--w-text); margin-bottom:10px;}
+  .dd-stats{display:flex;}
+  .dd-stat{flex:1; text-align:center;} .dd-stat + .dd-stat{border-left:1px solid var(--w-stroke);}
+  .dd-stat .v{font-size:18px; font-weight:700;} .dd-stat .l{font-size:10px; color:var(--w-text-2);}
+  .quality{display:flex; gap:10px; align-items:center; background:var(--w-pos-bg); border-radius:12px; padding:12px 13px; margin-bottom:11px;}
+  .quality .qi{font-size:20px;} .quality .qt{font-size:12px; color:#0a5e32; font-weight:600; line-height:1.45;}
+  .support-row{text-align:center; font-size:12px; color:var(--w-brand); font-weight:600; padding:10px;}
+  /* MBG hero gets a guarantee pill; bonus is the secondary block */
+  .reassure .r-tag{display:inline-block; background:#fff; color:var(--w-brand); font-weight:700; font-size:11.5px; padding:4px 12px; border-radius:999px; margin-top:10px; border:1px solid var(--w-brand-stroke);}
+  .sec-label{font-size:11px; font-weight:700; letter-spacing:.04em; color:var(--w-text-3); text-transform:uppercase; margin:2px 2px 7px;}
+  .bonus-note{background:var(--w-info-bg); border-radius:14px; padding:13px 14px; margin-bottom:11px;}
+  .bonus-note .bn-t{font-size:12.5px; font-weight:700; color:var(--w-info); margin-bottom:4px;}
+  .bonus-note .bn-b{font-size:11.5px; color:#4a2a86; line-height:1.5;}
+  .bonus-note .bn-date{display:inline-block; background:#fff; color:var(--w-info); font-weight:700; font-size:11px; padding:3px 11px; border-radius:999px; margin-top:9px; border:1px solid #d9c2f5;}
+  .notfault{background:var(--w-info-bg); border-radius:12px; padding:11px 13px; margin-bottom:11px; font-size:11.5px; color:#4a2a86; line-height:1.5;}
+  /* guarantee amount card */
+  .amt-card{background:#fff; border:1px solid var(--w-stroke); border-radius:14px; padding:14px; margin-bottom:11px;}
+  .amt-top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .amt-l{font-size:10.5px; color:var(--w-text-2); font-weight:600;}
+  .amt-big{font-size:24px; font-weight:700; color:var(--w-brand); line-height:1.25; margin-top:1px;}
+  .amt-right{text-align:right;}
+  .amt-mid{font-size:19px; font-weight:700; color:var(--w-text); line-height:1.25; margin-top:1px;}
+  .amt-sub{font-size:10px; color:var(--w-text-2); margin-top:1px;}
+  .amt-note{margin-top:11px; font-size:11.5px; font-weight:600; border-radius:9px; padding:8px 10px; line-height:1.45;}
+  .amt-note.ok{background:var(--w-pos-bg); color:#0a5e32;}
+  .amt-note.info{background:var(--w-info-bg); color:#4a2a86;}
+  .amt-note.brand{background:var(--w-brand-tint); color:#8a0059;}
+  /* MBG status card: amount + eligibility gauge (rate vs 60% target) + stats */
+  .mbg-status{background:#fff; border:1px solid var(--w-brand-stroke); border-radius:14px; padding:14px; margin-bottom:11px;}
+  .ms-amtrow{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .ms-l{font-size:10.5px; color:var(--w-text-2); font-weight:600;}
+  .ms-amt{font-size:23px; font-weight:700; color:var(--w-brand); line-height:1.25; margin-top:1px;}
+  .ms-amt small{font-size:11px; font-weight:600; color:var(--w-text-2);}
+  .ms-right{text-align:right;}
+  .ms-earn{font-size:18px; font-weight:700; color:var(--w-text); line-height:1.25; margin-top:1px;}
+  .ms-sub2{font-size:10px; color:var(--w-text-2); margin-top:1px;}
+  .gauge{position:relative; height:9px; background:var(--w-stroke); border-radius:5px; margin:15px 0 4px;}
+  .gauge .fill{position:absolute; left:0; top:0; bottom:0; border-radius:5px;}
+  .gauge .mark{position:absolute; left:60%; top:-4px; bottom:-4px; width:2px; background:var(--w-text);}
+  .gauge .mark::after{content:"60%"; position:absolute; top:-15px; left:50%; transform:translateX(-50%); font-size:9.5px; color:var(--w-text-2); white-space:nowrap;}
+  .gauge.g-ok .fill{background:var(--w-pos);} .gauge.g-warn .fill{background:var(--w-caution);} .gauge.g-bad .fill{background:var(--w-neg);}
+  .gauge-row{display:flex; justify-content:space-between; font-size:10px; color:var(--w-text-2); margin-top:7px;}
+  .ms-stats{display:flex; margin-top:11px; border-top:1px solid var(--w-stroke); padding-top:9px;}
+  .ms-stat{flex:1; text-align:center;} .ms-stat + .ms-stat{border-left:1px solid var(--w-stroke);}
+  .ms-stat .v{font-size:16px; font-weight:700;} .ms-stat .l{font-size:9.5px; color:var(--w-text-2);}
+  .ms-status{margin-top:11px; font-size:11px; font-weight:600; border-radius:9px; padding:8px 10px; line-height:1.45;}
+  .ms-status.ok{background:var(--w-pos-bg); color:#0a5e32;}
+  .ms-status.warn{background:var(--w-caution-bg); color:#5e4a00;}
+  .ms-status.info{background:var(--w-info-bg); color:#4a2a86;}
+  /* case gallery */
+  .case{border-top:1px solid var(--line); padding:28px 0 8px;}
+  .case-head{display:flex; gap:13px; align-items:flex-start; margin-bottom:18px;}
+  .case-n{flex:none; width:30px; height:30px; border-radius:50%; background:var(--magenta); color:#fff; font-weight:700; font-size:14px; display:flex; align-items:center; justify-content:center;}
+  .case-head h3{font-size:17px; margin:0 0 3px;}
+  .case-head p{margin:0; font-size:13.5px; color:var(--ink-2); max-width:78ch;}
+  .case-head p b{color:var(--ink);}
+  .case-phones{display:flex; gap:34px; flex-wrap:wrap; align-items:flex-start;}
+  .pcol{display:flex; flex-direction:column; align-items:center;}
+  .glabel{font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--magenta); margin-bottom:9px; display:flex; align-items:center; gap:6px;}
+  .glabel .arrow{color:var(--ink-3);}
+
+  /* tables */
+  table.grid{width:100%; border-collapse:collapse; font-size:13.5px; background:var(--card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;}
+  table.grid th{background:var(--page); text-align:left; padding:10px 13px; font-size:11.5px; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2); border-bottom:1px solid var(--line);}
+  table.grid td{padding:10px 13px; border-bottom:1px solid var(--line); vertical-align:top;}
+  table.grid tr:last-child td{border-bottom:none;}
+  table.grid td b{color:var(--ink);}
+  .badge{display:inline-block; font-size:11px; font-weight:700; padding:2px 8px; border-radius:5px;}
+  .b-info{background:var(--blue-soft); color:var(--blue);} .b-ok{background:var(--green-soft); color:var(--green);}
+  .b-warn{background:var(--amber-soft); color:var(--amber);} .b-brand{background:#FCE3F3; color:var(--magenta);}
+  .note{margin-top:16px; font-size:13px; color:var(--ink-2); background:#fff; border:1px solid var(--line); border-left:3px solid var(--magenta); border-radius:10px; padding:13px 15px;}
+  .note b{color:var(--ink);}
+  .two{display:grid; grid-template-columns:1fr 1fr; gap:18px;} @media(max-width:880px){.two{grid-template-columns:1fr;}}
+  code{background:var(--page); border:1px solid var(--line); border-radius:5px; padding:1px 6px; font-size:12.5px; color:var(--magenta);}
+  /* quiz options + branch flow (OptIn V0) */
+  .quiz-q{font-size:13.5px; color:var(--w-text); line-height:1.5; margin:2px 0 12px; font-weight:600;}
+  .quiz-opt{display:block; width:100%; text-align:left; background:#fff; border:1px solid var(--w-stroke-2); border-radius:12px; padding:12px 13px; margin-bottom:9px; font-size:13px; color:var(--w-text); line-height:1.4;}
+  .quiz-opt.correct{border-color:var(--w-pos); background:var(--w-pos-bg); color:#0a5e32;}
+  .quiz-opt.wrong{border-color:var(--w-neg); background:var(--w-neg-bg); color:#8a1620;}
+  .quiz-opt .mk{float:right; font-weight:700; margin-left:6px;}
+  .flow{display:flex; flex-wrap:wrap; align-items:center; gap:7px; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:15px 16px; margin:6px 0 2px; font-size:12.5px;}
+  .flow .node{background:var(--page); border:1px solid var(--line-2); border-radius:8px; padding:6px 10px; font-weight:600; color:var(--ink);}
+  .flow .node.brand{background:#FCE3F3; border-color:var(--w-brand-stroke); color:var(--magenta);}
+  .flow .node.ok{background:var(--green-soft); border-color:transparent; color:var(--green);}
+  .flow .node.warn{background:var(--amber-soft); border-color:transparent; color:var(--amber);}
+  .flow .arrow{color:var(--ink-3); font-weight:700;}
+  .flow .br{flex-basis:100%; height:2px;}
+  .flow .lbl{font-size:11px; color:var(--ink-3); font-weight:700; text-transform:uppercase; letter-spacing:.03em; margin-right:2px;}
+  .fine{margin-top:30px; font-size:12px; color:var(--ink-3); border-top:1px solid var(--line); padding-top:16px;}
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid #EAE7DF;box-shadow:0 1px 6px rgba(22,16,33,.05)">
+  <div style="max-width:1180px;margin:0 auto;padding:10px 22px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <span style="font-size:13px;font-weight:700;color:#D9008D;margin-right:6px;letter-spacing:.02em">MBG ·</span>
+    <a href="https://ashishagrawal-iam.github.io/MBG_v1/" style="padding:7px 15px;border-radius:999px;font-size:13px;font-weight:600;text-decoration:none;color:#5C5570;border:1px solid #D8D4CA">Full Journey · Vision</a>
+    <a href="https://ashishagrawal-iam.github.io/MBG_v1/v1.html" style="padding:7px 15px;border-radius:999px;font-size:13px;font-weight:600;text-decoration:none;color:#5C5570;border:1px solid #D8D4CA">v1 · Ship Now</a>
+    <a href="https://ashishagrawal-iam.github.io/MBG_v1/optin-v0.html" style="padding:7px 15px;border-radius:999px;font-size:13px;font-weight:700;text-decoration:none;background:#D9008D;color:#fff;border:1px solid #D9008D">OptIn V0</a>
+    <a href="https://ashishagrawal-iam.github.io/MBG_v1/prototype.html" style="padding:7px 15px;border-radius:999px;font-size:13px;font-weight:600;text-decoration:none;color:#5C5570;border:1px solid #D8D4CA">Prototype</a>
+  </div>
+</div>
+<div class="wrap">
+
+  <span class="tag">Internal · CSP App · OptIn V0 (working draft)</span>
+  <div class="hero">
+    <p class="eyebrow">Wiom · कमाई कवच · Opt-in V0 · working draft</p>
+    <h1>OptIn V0 — announcement + opt-in</h1>
+    <p>A focused working space to sharpen the <b>कमाई कवच</b> opt-in communication and add further screens. It starts with the two CleverTap full-pages carried over from v1 — the launch <b>announcement</b> and the mutual-oath <b>opt-in</b> — and will grow as we improve the flow.</p>
+  </div>
+
+  <!-- STAGE 1 -->
+  <div class="section" id="s1">
+    <div class="section-head"><div class="kicker">Stage 1 · Announcement</div><h2>The CSP hears about कमाई कवच (the MBG)</h2><p class="sub">A full-page CleverTap takeover on Home — the biggest, clearest way to land the news within v1 limits.</p></div>
+    <div class="stage">
+      <div class="explain">
+        <div class="meta"><span class="mtag trigger">Trigger: scheme launch / shortlisted</span><span class="mtag mct">CleverTap full-page</span></div>
+        <ul>
+          <li><b>One-line promise up top</b> (BV4): the CSP grasps it before reading anything else — "हर महीने ₹10,000 तक की कमाई पक्की" (the scheme is named <b>कमाई कवच</b>, never "बोनस").</li>
+          <li><b>The कमाई कवच promise is anchored up front</b> — up to ₹10,000/month, paid at month-end, for the cold-start window (till September). No bonus clutter on this screen.</li>
+          <li>Single CTA <b>"और जानें"</b> opens the drilldown, Home-routed via the existing in-app listener.</li>
+        </ul>
+        <div class="why"><b>Why full-page, not a banner here:</b> awareness needs maximum signal once. After this, the banner + drilldown carry the ongoing story — so the full-page is reserved for moments that genuinely deserve a takeover.</div>
+        <div class="copybox"><div class="ch">Copy</div>
+          <div class="copyrow"><div class="k">Kicker</div><div class="v"><span class="hi">कमाई कवच · सितंबर तक</span></div></div>
+          <div class="copyrow"><div class="k">Title</div><div class="v"><span class="hi">हर महीने ₹10,000 तक की कमाई पक्की · कमाई कवच</span></div></div>
+          <div class="copyrow"><div class="k">CTA</div><div class="v"><span class="hi">और जानें</span></div></div>
+        </div>
+      </div>
+      <div class="phone-wrap">
+        <div class="phone"><div class="screen">
+          <div class="w-header"><span class="menu">☰</span><span class="title hi">होम</span><span class="ic">🔔</span></div>
+          <div class="w-body">
+            <div class="ct">
+              <div class="ct-hero" style="flex:1;display:flex;flex-direction:column;padding-bottom:24px"><span class="ct-x">✕</span><div style="flex:1;display:flex;flex-direction:column;justify-content:center"><div class="ct-emoji">🛡️</div><div class="ct-kick hi">कमाई कवच · सितंबर तक</div><div class="ct-title hi" style="font-size:32px;line-height:1.22">हर महीने ₹10,000<br>तक की कमाई पक्की</div></div><button class="w-cta hi" style="background:#fff;color:var(--w-brand)">और जानें</button></div>
+            </div>
+          </div>
+        </div></div>
+        <div class="caption">CleverTap full-page — launch announcement</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STAGE 2 -->
+  <div class="section" id="s2">
+    <div class="section-head"><div class="kicker">Stage 2 · Opt-in</div><h2>The CSP accepts कमाई कवच</h2><p class="sub">A second full-page framed as a <b>mutual oath</b> — each side makes one vow — and captures acceptance via the CTA payload. This is the Mutual Compact, realised inside CleverTap.</p></div>
+    <div class="stage">
+      <div class="explain">
+        <div class="meta"><span class="mtag trigger">Trigger: taps "और जानें" / launch follow-up</span><span class="mtag mct">CleverTap full-page (accept CTA)</span></div>
+        <ul>
+          <li><b>A mutual oath, not a one-way offer:</b> each side makes one promise — Wiom vows weekly leads, the CSP vows 60% installs. "<span class="hi">यही आपकी कमाई पक्की करता है</span>." This two-way framing is what makes the commitment stick.</li>
+          <li><b>The guarantee as safety net:</b> "कम कनेक्शन मिलें तो भी हर महीने ₹10,000 तक पक्के" — so the CSP's promise carries no downside risk.</li>
+          <li><b>Accept CTA</b> "<span class="hi">मैं वादा करता हूँ</span>" — the button payload is captured by the existing CleverTap listener and recorded as opt-in (no new screen needed).</li>
+          <li>Plain terms below: ≥3 leads/month required, कमाई कवच paid at month-end.</li>
+        </ul>
+        <div class="why"><b>Why the oath framing:</b> a recorded mutual vow turns a broadcast into a relationship the CSP feels accountable to — the persistence the Cold Start floor demands. "<span class="hi">मैं वादा करता हूँ</span>" lands far stronger than "मैं तैयार हूँ".</div>
+        <div class="copybox"><div class="ch">Copy — the mutual oath</div>
+          <div class="copyrow"><div class="k">Title</div><div class="v"><span class="hi">दोनों एक-दूसरे से वादा करें</span></div></div>
+          <div class="copyrow"><div class="k">Sub</div><div class="v"><span class="hi">दोनों तरफ से एक-एक वादा, यही आपकी कमाई पक्की करता है।</span></div></div>
+          <div class="copyrow"><div class="k">Wiom का वादा</div><div class="v"><span class="hi">हर हफ्ते आपको पक्के कनेक्शन भेजेंगे</span></div></div>
+          <div class="copyrow"><div class="k">आपका वादा</div><div class="v"><span class="hi">कन्फ़र्म हुए कनेक्शन में से 60% इंस्टॉल पूरे करें</span></div></div>
+          <div class="copyrow"><div class="k">गारंटी</div><div class="v"><span class="hi">कम कनेक्शन मिलें तो भी हर महीने ₹10,000 तक पक्के</span></div></div>
+          <div class="copyrow"><div class="k">CTA</div><div class="v"><span class="hi">मैं वादा करता हूँ</span></div></div>
+        </div>
+      </div>
+      <div class="phone-wrap">
+        <div class="phone"><div class="screen">
+          <div class="w-header"><span class="menu">☰</span><span class="title hi">होम</span><span class="ic">🔔</span></div>
+          <div class="w-body">
+            <div class="ct">
+              <div class="ct-hero"><span class="ct-x">✕</span><div class="ct-emoji">🤝</div><div class="ct-kick hi">आपसी वादा · कमाई कवच</div><div class="ct-title hi">दोनों एक-दूसरे<br>से वादा करें</div></div>
+              <div class="ct-content">
+                <div class="ct-body hi" style="text-align:center;margin-bottom:13px">दोनों तरफ से एक-एक वादा,<br>यही आपकी कमाई पक्की करता है।</div>
+                <ul class="ct-list">
+                  <li>📩 <span class="hi"><b>Wiom का वादा:</b> हर हफ्ते आपको पक्के कनेक्शन भेजेंगे</span></li>
+                  <li>🔧 <span class="hi"><b>आपका वादा:</b> कन्फ़र्म हुए कनेक्शन में से 60% इंस्टॉल पूरे करें</span></li>
+                  <li>🛡️ <span class="hi"><b>हमारी गारंटी:</b> कम कनेक्शन मिलें तो भी हर महीने ₹10,000 तक पक्के</span></li>
+                </ul>
+                <div class="ct-ctas"><button class="w-cta hi">मैं वादा करता हूँ</button></div>
+              </div>
+            </div>
+          </div>
+        </div></div>
+        <div class="caption">CleverTap full-page — opt-in / compact</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STAGE 3 -->
+  <div class="section" id="s3">
+    <div class="section-head"><div class="kicker">Stage 3 · After the oath</div><h2>Audit gate + quiz → कमाई कवच चालू</h2><p class="sub">The moment the CSP taps <b>"मैं वादा करता हूँ"</b>, an invisible router checks the <b>नेटबॉक्स माफ़ी योजना</b> audit and branches. <b>Case 1</b> (audit pending) sends them to the audit (external browser) and handles the return. <b>Case 2</b> (audit done) takes them through a one-question comprehension quiz. Both converge on कमाई कवच being switched on.</p></div>
+
+    <div class="flow">
+      <span class="node brand hi">मैं वादा करता हूँ</span><span class="arrow">→</span><span class="node hi">ऑडिट हुआ?</span>
+      <div class="br"></div>
+      <span class="lbl">Case 1 · नहीं</span><span class="node warn hi">ऑडिट पूरा करें</span><span class="arrow">→</span><span class="node hi">URL (browser)</span><span class="arrow">→</span><span class="node hi">वापसी पर दोबारा जाँच</span><span class="arrow">→</span><span class="node ok hi">क्विज़</span>
+      <div class="br"></div>
+      <span class="lbl">Case 2 · हाँ</span><span class="node ok hi">क्विज़</span><span class="arrow">→</span><span class="node hi">सही जवाब</span><span class="arrow">→</span><span class="node ok hi">कमाई कवच चालू 🎉</span>
+    </div>
+
+    <div class="stage" style="margin-top:18px">
+      <div class="explain">
+        <div class="meta"><span class="mtag trigger">Trigger: taps "मैं वादा करता हूँ"</span><span class="mtag mct">CleverTap full-pages + external URL</span></div>
+        <ul>
+          <li><b>Router re-checks on app-resume:</b> CleverTap in-app doesn't fire on return from the browser, so the app re-fetches audit status on foreground — and routes to <b>done → quiz</b>, <b>processing → "जाँच में है"</b>, or <b>still pending → gentle retry</b> (never "you didn't finish it").</li>
+          <li><b>Quiz is comprehension, not an exam:</b> a wrong tap opens a warm teach screen and loops back — <b>unlimited retries, no red, no "गलत", no lockout</b>.</li>
+          <li><b>Real eligibility = oath AND audit-done AND quiz-passed</b>, persisted server-side. Month-end payout keys off this flag, not the oath tap.</li>
+          <li><b>Fast-path:</b> if the audit is N/A or already cleared, Case 1 is skipped — straight to the quiz.</li>
+          <li><b>"बाद में करें"</b> anywhere → Home with progress saved; the oath is never re-asked, and a soft home banner re-invites.</li>
+          <li><b>Offline-safe:</b> status fetch / eligibility write failures show a non-blaming "थोड़ी देर में फिर कोशिश करें", and the quiz pass is cached server-side.</li>
+        </ul>
+        <div class="why"><b>Naming locked:</b> the success state is <b>कमाई कवच</b> — never "सुरक्षा कवच" (a one-off slip; the CSP just committed to कमाई कवच end-to-end) and never "बोनस" (that's the separate 16th quality bonus). <b>Params locked to the CSP model:</b> up to ₹10,000/month · gate 60% · ≥3 connections · paid month-end · till September. <span class="hi"></span></div>
+        <div class="note" style="margin-top:14px"><b>Heads-up for the team:</b> internal files (MBG - internal file, comms-journey) still carry the old economics (<b>70% / ₹5,000</b>). These CSP screens use the current <b>60% / ₹10,000</b>. Lock one source of truth before build.</div>
+      </div>
+      <div class="phone-wrap">
+        <div class="phone"><div class="screen">
+          <div class="w-header"><span class="menu">☰</span><span class="title hi">होम</span><span class="ic">🔔</span></div>
+          <div class="w-body">
+            <div class="ct">
+              <div class="ct-hero"><span class="ct-x">✕</span><div class="ct-emoji">🛡️</div><div class="ct-kick hi">कमाई कवच · आख़िरी कदम</div><div class="ct-title hi">बस एक छोटा<br>कदम बाकी है</div></div>
+              <div class="ct-content">
+                <div class="ct-body hi">₹10,000 तक की कमाई कवच चालू करने के लिए पहले 'नेटबॉक्स माफ़ी योजना' का छोटा-सा ऑडिट पूरा कर लें।</div>
+                <div class="ct-ctas"><button class="w-cta hi">ऑडिट पूरा करें</button><button class="w-cta ghost hi">बाद में करें</button></div>
+              </div>
+            </div>
+          </div>
+        </div></div>
+        <div class="caption">Case 1 · audit_pending — CTA opens external audit URL</div>
+      </div>
+    </div>
+
+    <!-- CASE 1 group -->
+    <div class="case">
+      <div class="case-head"><span class="case-n">1</span><div><h3>Case 1 · Audit pending — return handling</h3><p>On return from the audit browser, the router lands the CSP on one of these by re-fetched status — a calm <b>"under review"</b> if just submitted, or a <b>no-blame retry</b> if still not done. Never the accusatory "you didn't complete it."</p></div></div>
+      <div class="case-phones">
+        <div class="pcol">
+          <div class="glabel">⏳ Returned · audit processing</div>
+          <div class="phone"><div class="screen">
+            <div class="w-header"><span class="menu">☰</span><span class="title hi">होम</span><span class="ic">🔔</span></div>
+            <div class="w-body"><div class="ct">
+              <div class="ct-hero" style="background:linear-gradient(155deg,#c8860b,#9a6a0a)"><span class="ct-x">✕</span><div class="ct-emoji">⏳</div><div class="ct-kick hi">कमाई कवच · जाँच जारी</div><div class="ct-title hi">आपका ऑडिट<br>जाँच में है</div></div>
+              <div class="ct-content"><div class="ct-body hi">आपका ऑडिट मिल गया है — जाँच पूरी होते ही कमाई कवच अपने आप अगला कदम खोल देगा।</div>
+                <div class="ct-ctas"><button class="w-cta hi" style="background:var(--w-caution)">फिर से जाँचें</button><button class="w-cta ghost hi">बाद में करें</button></div></div>
+            </div></div>
+          </div></div>
+          <div class="caption">audit_processing — submitted, re-checks</div>
+        </div>
+        <div class="pcol">
+          <div class="glabel">📋 Returned · still pending (no blame)</div>
+          <div class="phone"><div class="screen">
+            <div class="w-header"><span class="menu">☰</span><span class="title hi">होम</span><span class="ic">🔔</span></div>
+            <div class="w-body"><div class="ct">
+              <div class="ct-hero" style="background:linear-gradient(155deg,#7b3fd1,#5a17b0)"><span class="ct-x">✕</span><div class="ct-emoji">📋</div><div class="ct-kick hi">कमाई कवच · ऑडिट बाकी</div><div class="ct-title hi">कोई बात नहीं,<br>फिर से चलें</div></div>
+              <div class="ct-content"><div class="ct-body hi">ऑडिट अभी बाकी है — पूरा होते ही ₹10,000 तक की कमाई कवच खुल जाएगी।</div>
+                <div class="ct-ctas"><button class="w-cta hi" style="background:var(--w-info)">ऑडिट फिर खोलें</button><button class="w-cta ghost hi">बाद में करें</button></div></div>
+            </div></div>
+          </div></div>
+          <div class="caption">audit_retry — reopens the URL, unlimited tries</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CASE 2 group -->
+    <div class="case">
+      <div class="case-head"><span class="case-n">2</span><div><h3>Case 2 / convergence · Quiz → eligible</h3><p>Reached when the audit is done (first check, on return, or N/A). <b>Four</b> comprehension questions gate entry; tapping an option is the action. Each correct answer advances; a wrong one opens that question’s teach screen (with the calculation) and loops back. All four correct switches on कमाई कवच. (Correct: B, C, B, D.) <b>On tap</b> the chosen option flashes <b>green ✓</b> if correct (then advances) or <b>red ✕</b> if wrong — revealing the correct option — before opening the teach screen. (Live in the <b>Prototype</b> tab.)</p></div></div>
+      <div class="case-phones">
+        <div class="pcol">
+          <div class="glabel">📝 quiz_intro (4 सवाल)</div>
+          <div class="phone"><div class="screen">
+            <div class="w-header"><span class="menu">☰</span><span class="title hi">होम</span><span class="ic">🔔</span></div>
+            <div class="w-body"><div class="ct">
+              <div class="ct-hero"><span class="ct-x">✕</span><div class="ct-emoji">📝</div><div class="ct-kick hi">कमाई कवच · 4 छोटे सवाल</div><div class="ct-title hi">एक आसान क्विज़,<br>फिर तैयार</div></div>
+              <div class="ct-content"><div class="ct-body hi">कमाई कवच चालू करने के लिए बस 4 आसान सवालों के जवाब दीजिए — सभी सही होते ही आप शामिल हो जाएंगे।</div>
+                <div class="ct-ctas"><button class="w-cta hi">सवाल शुरू करें</button></div></div>
+            </div></div>
+          </div></div>
+          <div class="caption">quiz_intro — frames it as quick, not a test</div>
+        </div>
+        <div class="pcol">
+          <div class="glabel">❓ सवाल 1/4</div>
+          <div class="phone"><div class="screen">
+            <div class="w-header"><span class="menu">☰</span><span class="title hi">होम</span><span class="ic">🔔</span></div>
+            <div class="w-body"><div class="ct">
+              <div class="ct-hero"><span class="ct-x">✕</span><div class="ct-emoji">❓</div><div class="ct-kick hi">कमाई कवच · सवाल 1/4</div><div class="ct-title hi">कमाई कवच क्या है?</div></div>
+              <div class="ct-content" style="overflow-y:auto">
+                <div class="quiz-q hi">इनमें से सही बात कौन-सी है?</div>
+                <button class="quiz-opt hi"><b>A)</b> बिना काम किए हर महीने ₹10,000 पक्का मिलेगा।</button>
+                <button class="quiz-opt correct hi"><b>B)</b> हर इंस्टॉल के ₹300, और महीने का कम से कम ₹10,000 की गारंटी। <span class="mk">✓</span></button>
+                <button class="quiz-opt hi"><b>C)</b> सिर्फ़ इंस्टॉल के पैसे, कोई ₹10,000 गारंटी नहीं।</button>
+                <button class="quiz-opt hi"><b>D)</b> हर इंस्टॉल के ₹300 और ₹10,000 गारंटी, इंस्टॉल रेट चाहे जो भी हो।</button>
+              </div>
+            </div></div>
+          </div></div>
+          <div class="caption">सही जवाब: B</div>
+        </div>
+        <div class="pcol">
+          <div class="glabel">💡 सवाल 1 · समझें</div>
+          <div class="phone"><div class="screen">
+            <div class="w-header"><span class="menu">☰</span><span class="title hi">होम</span><span class="ic">🔔</span></div>
+            <div class="w-body"><div class="ct">
+              <div class="ct-hero" style="background:linear-gradient(155deg,#7b3fd1,#5a17b0)"><span class="ct-x">✕</span><div class="ct-emoji">💡</div><div class="ct-kick hi">कमाई कवच · समझें</div><div class="ct-title hi">कमाई कवच समझें</div></div>
+              <div class="ct-content" style="overflow-y:auto">
+                <div class="ct-body hi" style="line-height:1.75">कमाई कवच में हर इंस्टॉल के आपको <b>₹300</b> मिलते हैं। अगर पूरे महीने की इंस्टॉल कमाई ₹10,000 से कम रह जाए, तो Wiom उसे <b>₹10,000 तक पूरा</b> कर देती है — इसके लिए इंस्टॉल रेट <b>60% या ऊपर</b> होनी चाहिए।</div>
+                <div class="ct-ctas"><button class="w-cta hi" style="background:var(--w-info)">दोबारा कोशिश करें</button></div>
+              </div>
+            </div></div>
+          </div></div>
+          <div class="caption">galat hone par teach → retry</div>
+        </div>
+        <div class="pcol">
+          <div class="glabel">❓ सवाल 2/4</div>
+          <div class="phone"><div class="screen">
+            <div class="w-header"><span class="menu">☰</span><span class="title hi">होम</span><span class="ic">🔔</span></div>
+            <div class="w-body"><div class="ct">
+              <div class="ct-hero"><span class="ct-x">✕</span><div class="ct-emoji">❓</div><div class="ct-kick hi">कमाई कवच · सवाल 2/4</div><div class="ct-title hi">अब हिसाब लगाइए</div></div>
+              <div class="ct-content" style="overflow-y:auto">
+                <div class="quiz-q hi">इस महीने आपको 10 कनेक्शन आते हैं और आप उनमें से 8 इंस्टॉल कर देते हैं। आपकी कुल कमाई कितनी होगी?</div>
+                <button class="quiz-opt hi"><b>A)</b> ₹2,400</button>
+                <button class="quiz-opt hi"><b>B)</b> ₹7,600</button>
+                <button class="quiz-opt correct hi"><b>C)</b> ₹10,000 <span class="mk">✓</span></button>
+                <button class="quiz-opt hi"><b>D)</b> ₹2,600</button>
+              </div>
+            </div></div>
+          </div></div>
+          <div class="caption">सही जवाब: C</div>
+        </div>
+        <div class="pcol">
+          <div class="glabel">💡 सवाल 2 · समझें</div>
+          <div class="phone"><div class="screen">
+            <div class="w-header"><span class="menu">☰</span><span class="title hi">होम</span><span class="ic">🔔</span></div>
+            <div class="w-body"><div class="ct">
+              <div class="ct-hero" style="background:linear-gradient(155deg,#7b3fd1,#5a17b0)"><span class="ct-x">✕</span><div class="ct-emoji">💡</div><div class="ct-kick hi">कमाई कवच · समझें</div><div class="ct-title hi">ऐसे बनता है ₹10,000</div></div>
+              <div class="ct-content" style="overflow-y:auto">
+                <div class="ct-body hi" style="line-height:1.75">1️⃣ इंस्टॉल रेट = 8 ÷ 10 = <b>80%</b> — 60% से ऊपर, गारंटी लागू।<br>2️⃣ इंस्टॉल कमाई = ₹300 × 8 = <b>₹2,400</b>।<br>3️⃣ ₹2,400 &lt; ₹10,000 — टॉप-अप = ₹10,000 − ₹2,400 = <b>₹7,600</b>।<br>4️⃣ कुल = <b>₹10,000</b>।</div>
+                <div class="ct-ctas"><button class="w-cta hi" style="background:var(--w-info)">दोबारा कोशिश करें</button></div>
+              </div>
+            </div></div>
+          </div></div>
+          <div class="caption">galat hone par teach → retry</div>
+        </div>
+        <div class="pcol">
+          <div class="glabel">❓ सवाल 3/4</div>
+          <div class="phone"><div class="screen">
+            <div class="w-header"><span class="menu">☰</span><span class="title hi">होम</span><span class="ic">🔔</span></div>
+            <div class="w-body"><div class="ct">
+              <div class="ct-hero"><span class="ct-x">✕</span><div class="ct-emoji">❓</div><div class="ct-kick hi">कमाई कवच · सवाल 3/4</div><div class="ct-title hi">एक और हिसाब</div></div>
+              <div class="ct-content" style="overflow-y:auto">
+                <div class="quiz-q hi">इस महीने 10 कनेक्शन आते हैं, लेकिन आप सिर्फ़ 5 इंस्टॉल कर पाते हैं। आपकी कमाई कितनी होगी?</div>
+                <button class="quiz-opt hi"><b>A)</b> ₹10,000 (गारंटी तो मिल ही जाएगा)</button>
+                <button class="quiz-opt correct hi"><b>B)</b> ₹1,500 — सिर्फ़ इंस्टॉल की कमाई, गारंटी नहीं <span class="mk">✓</span></button>
+                <button class="quiz-opt hi"><b>C)</b> ₹6,000</button>
+                <button class="quiz-opt hi"><b>D)</b> ₹3,000</button>
+              </div>
+            </div></div>
+          </div></div>
+          <div class="caption">सही जवाब: B</div>
+        </div>
+        <div class="pcol">
+          <div class="glabel">💡 सवाल 3 · समझें</div>
+          <div class="phone"><div class="screen">
+            <div class="w-header"><span class="menu">☰</span><span class="title hi">होम</span><span class="ic">🔔</span></div>
+            <div class="w-body"><div class="ct">
+              <div class="ct-hero" style="background:linear-gradient(155deg,#7b3fd1,#5a17b0)"><span class="ct-x">✕</span><div class="ct-emoji">💡</div><div class="ct-kick hi">कमाई कवच · समझें</div><div class="ct-title hi">60% से नीचे — गारंटी नहीं</div></div>
+              <div class="ct-content" style="overflow-y:auto">
+                <div class="ct-body hi" style="line-height:1.75">1️⃣ इंस्टॉल रेट = 5 ÷ 10 = <b>50%</b> — 60% से नीचे।<br>2️⃣ ₹10,000 गारंटी सिर्फ़ <b>60% या ज़्यादा</b> पर मिलती है। नीचे कोई टॉप-अप नहीं — हार्ड लाइन।<br>3️⃣ सिर्फ़ इंस्टॉल कमाई = ₹300 × 5 = <b>₹1,500</b>।<br>💡 1 और इंस्टॉल (60%) पूरा ₹10,000 अनलॉक कर देता।</div>
+                <div class="ct-ctas"><button class="w-cta hi" style="background:var(--w-info)">दोबारा कोशिश करें</button></div>
+              </div>
+            </div></div>
+          </div></div>
+          <div class="caption">galat hone par teach → retry</div>
+        </div>
+        <div class="pcol">
+          <div class="glabel">❓ सवाल 4/4</div>
+          <div class="phone"><div class="screen">
+            <div class="w-header"><span class="menu">☰</span><span class="title hi">होम</span><span class="ic">🔔</span></div>
+            <div class="w-body"><div class="ct">
+              <div class="ct-hero"><span class="ct-x">✕</span><div class="ct-emoji">❓</div><div class="ct-kick hi">कमाई कवच · सवाल 4/4</div><div class="ct-title hi">आख़िरी सवाल</div></div>
+              <div class="ct-content" style="overflow-y:auto">
+                <div class="quiz-q hi">इस महीने 50 कनेक्शन आते हैं और आप 40 इंस्टॉल कर देते हैं। आपकी कमाई कितनी होगी?</div>
+                <button class="quiz-opt hi"><b>A)</b> ₹10,000 (गारंटी तक ही मिलेगा)</button>
+                <button class="quiz-opt hi"><b>B)</b> ₹2,000</button>
+                <button class="quiz-opt hi"><b>C)</b> ₹11,000</button>
+                <button class="quiz-opt correct hi"><b>D)</b> ₹12,000 — पूरी इंस्टॉल कमाई आपकी <span class="mk">✓</span></button>
+              </div>
+            </div></div>
+          </div></div>
+          <div class="caption">सही जवाब: D</div>
+        </div>
+        <div class="pcol">
+          <div class="glabel">💡 सवाल 4 · समझें</div>
+          <div class="phone"><div class="screen">
+            <div class="w-header"><span class="menu">☰</span><span class="title hi">होम</span><span class="ic">🔔</span></div>
+            <div class="w-body"><div class="ct">
+              <div class="ct-hero" style="background:linear-gradient(155deg,#7b3fd1,#5a17b0)"><span class="ct-x">✕</span><div class="ct-emoji">💡</div><div class="ct-kick hi">कमाई कवच · समझें</div><div class="ct-title hi">गारंटी से ऊपर — पूरा आपका</div></div>
+              <div class="ct-content" style="overflow-y:auto">
+                <div class="ct-body hi" style="line-height:1.75">1️⃣ इंस्टॉल रेट = 40 ÷ 50 = <b>80%</b> — गेट पार।<br>2️⃣ इंस्टॉल कमाई = ₹300 × 40 = <b>₹12,000</b>।<br>3️⃣ ₹12,000 &gt; ₹10,000 — कोई टॉप-अप नहीं, पूरा <b>₹12,000 आपका</b>।</div>
+                <div class="ct-ctas"><button class="w-cta hi" style="background:var(--w-info)">दोबारा कोशिश करें</button></div>
+              </div>
+            </div></div>
+          </div></div>
+          <div class="caption">galat hone par teach → retry</div>
+        </div>
+        <div class="pcol">
+          <div class="glabel">🎉 eligible (opt-in complete)</div>
+          <div class="phone"><div class="screen">
+            <div class="w-header"><span class="menu">☰</span><span class="title hi">होम</span><span class="ic">🔔</span></div>
+            <div class="w-body"><div class="ct">
+              <div class="ct-hero" style="background:linear-gradient(155deg,#0a9d56,#007a40)"><span class="ct-x">✕</span><div class="ct-emoji">🎉</div><div class="ct-kick hi">कमाई कवच · चालू</div><div class="ct-title hi">बधाई हो,<br>कमाई कवच चालू!</div></div>
+              <div class="ct-content"><div class="ct-body hi">वादा पक्का — हर महीने मिले कनेक्शन का 60% लगाएं, और महीने के अंत में ₹10,000 तक आपके।</div>
+                <div class="ct-ctas"><button class="w-cta hi" style="background:var(--w-pos)">ठीक है</button></div></div>
+            </div></div>
+          </div></div>
+          <div class="caption">eligible — bridges to the home कमाई कवच status</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+</body>
+</html>

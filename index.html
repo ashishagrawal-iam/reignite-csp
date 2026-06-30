@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reignite — CSP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand:#D9008D; --brand100:#FFE5F6; --brand200:#FFCCED;
+  --secondary:#443152;
+  --n900:#161021; --n700:#665E75; --n500:#A7A1B2; --n300:#D7D3E0; --n200:#E8E4F0; --n100:#F1EDF7; --white:#FAF9FC;
+  --green:#008043; --green100:#E1FAED; --green200:#C9F0DD;
+  --red:#E01E00; --red100:#FFE9E5; --red300:#FFBDB3;
+  --warn:#FF8000; --warn200:#FFE6CC;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{
+  font-family:'Noto Sans Devanagari',sans-serif;
+  background:#2a2336;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:26px 14px 50px;
+}
+.pagehead{color:#cfc7dd;text-align:center;margin-bottom:18px;}
+.pagehead h1{font-size:16px;color:#fff;font-weight:700;}
+
+.phone{width:380px;max-width:96vw;height:770px;background:var(--white);border-radius:38px;border:11px solid #0c0814;position:relative;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.5);}
+.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:140px;height:26px;background:#0c0814;border-radius:0 0 16px 16px;z-index:50;}
+.statusbar{height:40px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 22px 5px;font-size:12px;font-weight:600;color:var(--n900);}
+.screen{position:absolute;inset:0;top:40px;display:none;flex-direction:column;overflow-y:auto;padding-bottom:104px;}
+.screen.active{display:flex;animation:fade .35s ease;}
+@keyframes fade{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
+.screen::-webkit-scrollbar{width:0;}
+
+.dots{position:absolute;top:9px;left:0;right:0;display:flex;gap:6px;justify-content:center;z-index:40;}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--n300);transition:.3s;}
+.dots i.on{background:var(--brand);width:20px;border-radius:6px;}
+
+.ctabar{position:absolute;bottom:0;left:0;right:0;padding:16px 20px 22px;background:linear-gradient(to top,var(--white) 70%,rgba(250,249,252,0));z-index:30;}
+/* full-bleed dark screens: gradient runs to the bottom, CTA floats over it */
+.screen.bleed{padding-bottom:0;}
+.screen.bleed .ctabar{background:transparent;}
+.screen.bleed .btn-primary{background:#fff;color:var(--brand);box-shadow:0 10px 26px rgba(0,0,0,.28);}
+.btn{display:block;width:100%;padding:18px;border-radius:16px;border:none;font-family:inherit;font-size:18px;font-weight:800;cursor:pointer;transition:.15s;}
+.btn-primary{background:var(--brand);color:#fff;box-shadow:0 8px 22px rgba(217,0,141,.35);}
+.btn-primary:active{transform:scale(.98);}
+.btn-line{background:var(--white);color:var(--brand);border:2px solid var(--brand200);}
+
+/* ---- 1 HERO ---- */
+.hero{flex:1;background:linear-gradient(168deg,#8a0a5e 0%,#b8017a 48%,#D9008D 100%);color:#fff;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:40px 30px;}
+.flame{font-size:80px;line-height:1;margin-bottom:24px;}
+.hero h1{font-size:46px;font-weight:900;line-height:1.1;letter-spacing:-.5px;}
+.hero p{font-size:19px;color:#f3d8ea;margin-top:18px;font-weight:500;line-height:1.5;}
+.pill{display:inline-block;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);padding:8px 18px;border-radius:999px;font-size:14px;font-weight:700;margin-top:26px;}
+
+/* ---- generic content screen ---- */
+.body{flex:1;padding:36px 26px 0;}
+.kicker{font-size:15px;font-weight:800;color:var(--brand);letter-spacing:.3px;}
+.head{font-size:34px;font-weight:900;line-height:1.15;letter-spacing:-.4px;margin-top:8px;}
+
+/* ---- 2 DEAL ---- */
+.deal{display:flex;flex-direction:column;gap:14px;margin-top:28px;}
+.dcard{position:relative;border-radius:22px;padding:22px;border:2px solid;box-shadow:0 8px 24px rgba(68,49,82,.07);}
+.dcard .who{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.3px;padding:6px 12px;border-radius:999px;}
+.dcard .what{font-size:23px;font-weight:900;line-height:1.3;margin-top:12px;}
+.dcard.w{background:var(--brand100);border-color:var(--brand200);}
+.dcard.w .who{background:var(--brand);color:#fff;}
+.dcard.w .what{color:var(--secondary);}
+.dcard.c{background:#F1E5FF;border-color:#E4CCFF;}
+.dcard.c .who{background:#4a1a8a;color:#fff;}
+.dcard.c .what{color:#4a1a8a;}
+.arrow{align-self:center;width:48px;height:48px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-size:24px;font-weight:900;margin:-21px 0;z-index:2;border:4px solid var(--white);box-shadow:0 6px 18px rgba(217,0,141,.4);}
+
+/* ---- 3 GUARANTEE ---- */
+.gwrap{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:30px;}
+.gbox{background:linear-gradient(150deg,#16331f,#0c5a36);color:#fff;border-radius:30px;padding:40px 30px;width:100%;}
+.shield{font-size:50px;}
+.amt{font-size:62px;font-weight:900;letter-spacing:-2px;line-height:1;margin-top:10px;}
+.gsub{font-size:16px;opacity:.9;margin-top:6px;}
+.gline{font-size:24px;font-weight:900;color:var(--n900);line-height:1.3;margin-top:30px;}
+
+/* ---- QUIZ ---- */
+.qhead{padding:30px 26px 0;}
+.qbar{height:8px;background:var(--n200);border-radius:999px;overflow:hidden;margin-top:14px;}
+.qbar i{display:block;height:100%;background:var(--brand);border-radius:999px;transition:.4s;}
+.qtext{font-size:30px;font-weight:900;line-height:1.25;padding:22px 26px 8px;letter-spacing:-.4px;}
+.opts{padding:6px 20px;}
+.opt{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--white);border:2px solid var(--n200);border-radius:16px;padding:19px 18px;margin-top:13px;font-family:inherit;font-size:19px;font-weight:700;color:var(--n900);cursor:pointer;transition:.15s;}
+.opt:active{transform:scale(.99);}
+.opt.correct{background:var(--green100);border-color:var(--green);}
+.opt.correct::after{content:'✓';margin-left:auto;color:var(--green);font-weight:900;font-size:22px;}
+.opt.wrong{background:var(--red100);border-color:var(--red300);}
+.opt.dim{opacity:.4;}
+.opt:disabled{cursor:default;}
+.shake{animation:shake .4s;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-7px);}75%{transform:translateX(7px);}}
+
+/* ---- ENROLLED ---- */
+.done{flex:1;background:linear-gradient(168deg,#8a0a5e 0%,#b8017a 48%,#D9008D 100%);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;}
+.tick{width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.16);border:2px solid rgba(255,255,255,.42);display:grid;place-items:center;font-size:58px;margin-bottom:26px;}
+.done h1{font-size:40px;font-weight:900;line-height:1.1;}
+.done p{font-size:18px;color:#f3d8ea;margin-top:14px;}
+
+/* ---- HOME ---- */
+.appbar{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--n200);}
+.appbar .logo{font-weight:900;font-size:20px;color:var(--brand);}
+.statepill{background:var(--green100);color:var(--green);font-size:13px;font-weight:800;padding:6px 13px;border-radius:999px;}
+.action{background:var(--warn200);border:2px solid #FFD9B3;border-radius:20px;margin:20px;padding:22px;display:flex;gap:14px;align-items:center;}
+.action .big{flex:1;}
+.action .n{font-size:26px;font-weight:900;color:var(--n900);line-height:1.2;}
+.action .s{font-size:15px;color:#8a4a00;font-weight:600;margin-top:4px;}
+.action .go{font-size:30px;color:var(--warn);font-weight:900;}
+.track{margin:0 20px;border:1px solid var(--n200);border-radius:20px;padding:20px;}
+.track .t{font-size:15px;color:var(--n700);font-weight:700;}
+.track .v{font-size:32px;font-weight:900;margin-top:4px;}
+.track .v small{font-size:18px;color:var(--n500);font-weight:700;}
+.pmini{height:10px;background:var(--n200);border-radius:999px;overflow:hidden;margin-top:14px;}
+.pmini i{display:block;height:100%;background:var(--green);border-radius:999px;}
+.calm{text-align:center;font-size:14px;color:var(--n500);font-weight:600;margin-top:22px;padding:0 30px;}
+
+.navhint{display:flex;gap:8px;margin-top:16px;}
+.navhint button{background:#3a3148;color:#cfc7dd;border:1px solid #4a4159;border-radius:10px;padding:9px 14px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;}
+</style>
+</head>
+<body>
+
+<div class="pagehead"><h1>🔥 Reignite · CSP App</h1></div>
+
+<div class="phone">
+  <div class="notch"></div>
+  <div class="statusbar"><span>9:41</span><span>5G ▰▰▰▱ 84%</span></div>
+  <div class="dots" id="dots"></div>
+
+  <!-- 1 HERO -->
+  <section class="screen active bleed" data-s="0">
+    <div class="hero">
+      <div class="shield" style="font-size:60px;margin-bottom:18px">🛡️</div>
+      <h1 style="font-size:60px">₹30,000</h1>
+      <p style="font-size:22px;font-weight:700;color:#fff;margin-top:6px">की गारंटी।</p>
+      <p>अगले 3 महीने —<br>नए कनेक्शन ना आएँ, तो भी।</p>
+    </div>
+    <div class="ctabar"><button class="btn btn-primary" onclick="go(1)">और जाने</button></div>
+  </section>
+
+  <!-- 2 THE DEAL -->
+  <section class="screen" data-s="1">
+    <div class="body">
+      <div class="kicker">सीधा हिसाब</div>
+      <div class="head">एक वादा हमारा,<br>एक वादा आपका।</div>
+      <div class="deal">
+        <div class="dcard w">
+          <div class="who">हमारा वादा</div>
+          <div class="what">नए कनेक्शन लाएँगें।<br>ना ला पाए तो ₹10,000 हर महीने सुरक्षित।</div>
+        </div>
+        <div class="arrow">⇅</div>
+        <div class="dcard c">
+          <div class="who">आपका वादा</div>
+          <div class="what">कम से कम 60%<br>कनेक्शन लगाएं।</div>
+        </div>
+      </div>
+    </div>
+    <div class="ctabar"><button class="btn btn-primary" onclick="go(2)">गारंटी की डिटेल देखें</button></div>
+  </section>
+
+  <!-- 3 GUARANTEE -->
+  <section class="screen" data-s="2">
+    <div class="gwrap">
+      <div class="gbox">
+        <div class="gsub" style="opacity:.85">हर महीने सुरक्षित</div>
+        <div style="margin-top:16px;display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;font-weight:900;"><span style="font-size:20px;opacity:.9">जुलाई में</span><span style="font-size:24px">₹10k</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;font-weight:900;"><span style="font-size:20px;opacity:.9">अगस्त में</span><span style="font-size:24px">₹10k</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;font-weight:900;"><span style="font-size:20px;opacity:.9">सितंबर में</span><span style="font-size:24px">₹10k</span></div>
+        </div>
+        <div style="height:1px;background:rgba(255,255,255,.25);margin:18px 0"></div>
+        <div class="gsub" style="font-size:15px">3 महीने में</div>
+        <div class="amt" style="font-size:56px">₹30,000</div>
+      </div>
+      <div class="gline">नए कनेक्शन ना आई?<br>पैसा फिर भी आपका।</div>
+    </div>
+    <div class="ctabar"><button class="btn btn-primary" onclick="go(3)">स्कीम से जुड़ना चाहेंगे?</button></div>
+  </section>
+
+  <!-- 4 QUIZ INTRO -->
+  <section class="screen" data-s="3">
+    <div class="gwrap">
+      <div style="font-size:64px;margin-bottom:6px">📝</div>
+      <div class="head" style="font-size:32px">बस एक छोटा सवाल-जवाब।</div>
+      <p style="font-size:18px;color:var(--n700);font-weight:600;margin-top:16px;line-height:1.55">स्कीम से जुड़ने के लिए<br>3 आसान सवालों के जवाब दें।</p>
+    </div>
+    <div class="ctabar"><button class="btn btn-primary" onclick="startQuiz()">सवाल-जवाब शुरू करें</button></div>
+  </section>
+
+  <!-- 5 QUIZ -->
+  <section class="screen" data-s="4">
+    <div class="qhead"><div class="qbar"><i id="qbar"></i></div></div>
+    <div class="qtext" id="qtext"></div>
+    <div class="opts" id="opts"></div>
+    <div class="ctabar" id="quizcta" style="display:none"><button class="btn btn-primary" id="qnext" onclick="nextQ()">आगे</button></div>
+  </section>
+
+  <!-- 6 ENROLLED -->
+  <section class="screen bleed" data-s="5">
+    <div class="done">
+      <div class="tick">✓</div>
+      <h1 style="font-size:18px">बधाई हो,<br>आप गारंटी स्कीम से जुड़ चुके हैं!</h1>
+      <p style="font-size:40px;font-weight:900;color:#fff;line-height:1.1;font-style:italic">अगला कनेक्शन ज़रूर लगायें</p>
+    </div>
+    <div class="ctabar"><button class="btn btn-primary" onclick="go(6)">सारे काम देखें</button></div>
+  </section>
+
+  <!-- 7 HOME -->
+  <section class="screen" data-s="6">
+    <div class="appbar"><span class="logo">wiom</span><span class="statepill">🔥 महीना 1</span></div>
+    <div class="action">
+      <div class="big">
+        <div class="n">2 नए कस्टमर</div>
+        <div class="s">आज इंस्टॉल करने हैं</div>
+      </div>
+      <div class="go">→</div>
+    </div>
+    <div class="track">
+      <div class="t">इस महीने इंस्टॉल · लक्ष्य 60%</div>
+      <div class="v">9 <small>/ 12</small></div>
+      <div class="pmini"><i style="width:75%"></i></div>
+    </div>
+    <div class="calm">कुछ नया होगा, तभी दिखेगा।<br>रोज़ की टोका-टाकी नहीं।</div>
+    <div class="ctabar"><button class="btn btn-line" onclick="restart()">↺ दोबारा देखो</button></div>
+  </section>
+</div>
+
+<div class="navhint">
+  <button onclick="restart()">↺ Restart</button>
+  <button onclick="startQuiz()">Quiz</button>
+  <button onclick="go(6)">Home</button>
+</div>
+
+<script>
+const TOTAL=7; let cur=0;
+const screens=[...document.querySelectorAll('.screen')];
+const dotsWrap=document.getElementById('dots');
+for(let i=0;i<TOTAL;i++)dotsWrap.appendChild(document.createElement('i'));
+const dots=[...dotsWrap.children];
+function render(){screens.forEach(s=>s.classList.toggle('active',+s.dataset.s===cur));dots.forEach((d,i)=>d.classList.toggle('on',i===cur));const sc=screens.find(s=>+s.dataset.s===cur);if(sc)sc.scrollTop=0;}
+function go(n){cur=n;render();}
+function restart(){cur=0;qi=0;render();}
+
+const QUIZ=[
+ {q:"नए कनेक्शन ना आए तो क्या मिलेगा?",opts:["सोने का सिक्का","₹10,000 गारंटी","कुछ नहीं","मुफ़्त चाय"],c:1},
+ {q:"यह स्कीम कितने वक़्त चलेगी?",opts:["हमेशा के लिए","सिर्फ़ 1 दिन","3 महीने","जब तक चाँद रहे"],c:2},
+ {q:"आपको क्या करना होगा?",opts:["रोज़ सेल्फ़ी भेजना","बस बैठे रहना","इंस्टॉल करना","गिफ़्ट देना"],c:2}
+];
+let qi=0,answered=false;
+function startQuiz(){qi=0;cur=4;render();loadQ();}
+function loadQ(){
+ answered=false;const item=QUIZ[qi];
+ document.getElementById('qbar').style.width=((qi+1)/QUIZ.length*100)+'%';
+ document.getElementById('qtext').textContent=item.q;
+ document.getElementById('quizcta').style.display='none';
+ const wrap=document.getElementById('opts');wrap.innerHTML='';
+ item.opts.forEach((txt,idx)=>{const b=document.createElement('button');b.className='opt';b.textContent=txt;b.onclick=()=>choose(b,idx,item);wrap.appendChild(b);});
+}
+function choose(btn,idx,item){
+ if(answered)return;
+ if(idx===item.c){
+  answered=true;btn.classList.add('correct');
+  [...document.getElementById('opts').children].forEach((b,i)=>{b.disabled=true;if(i!==idx)b.classList.add('dim');});
+  if(qi===QUIZ.length-1){
+   document.getElementById('qnext').textContent='स्कीम से जुड़िए';
+   document.getElementById('quizcta').style.display='block';
+  }else{
+   setTimeout(nextQ,650);
+  }
+ }else{
+  btn.classList.add('wrong','shake');
+  setTimeout(()=>btn.classList.remove('shake'),420);
+  setTimeout(()=>btn.classList.remove('wrong'),900);
+ }
+}
+function nextQ(){if(qi<QUIZ.length-1){qi++;loadQ();}else{go(5);}}
+render();
+</script>
+</body>
+</html>

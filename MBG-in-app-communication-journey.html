@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MBG — In-App Communication Journey · Wiom CSP App</title>
+<style>
+  :root{
+    /* doc chrome */
+    --magenta:#D9008D; --ink:#161021; --ink-2:#5C5570; --ink-3:#9A9A93;
+    --page:#FAFAF7; --card:#FFFFFF; --line:#EAE7DF; --line-2:#D8D4CA;
+    --green:#0F7A52; --green-soft:#E4F4EC;
+    --red:#C0392B; --red-soft:#FBEBE9;
+    --amber:#9A6A0A; --amber-soft:#F8EFDC;
+    --blue:#1763B6; --blue-soft:#E8F1FB;
+    --radius:14px;
+
+    /* Wiom app tokens (exact) */
+    --w-brand:#D9008D; --w-brand-tint:#FFE5F6; --w-brand-stroke:#FFB2E4;
+    --w-secondary:#443152;            /* dark purple header */
+    --w-screen:#FAF9FC; --w-bg:#E8E4F0; --w-surface:#FFFFFF;
+    --w-text:#161021; --w-text-2:#665E75; --w-text-3:#A7A1B2;
+    --w-stroke:#E8E4F0; --w-stroke-2:#D7D3E0;
+    --w-pos:#008043; --w-pos-bg:#E1FAED;
+    --w-neg:#D92130; --w-neg-bg:#FFE5E7;
+    --w-warn:#B85C00; --w-warn-bg:#FFE6CC;
+    --w-caution:#806000; --w-caution-bg:#FFF2BF;
+    --w-info:#6D17CE; --w-info-bg:#F1E5FF;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--page); color:var(--ink); font-family:"Segoe UI",system-ui,-apple-system,"Noto Sans",Roboto,sans-serif; line-height:1.6; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1180px; margin:0 auto; padding:32px 22px 80px;}
+  .hi{font-family:"Noto Sans Devanagari","Segoe UI",sans-serif;}
+
+  .eyebrow{font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); margin:0 0 8px;}
+  h1{font-size:30px; line-height:1.18; font-weight:700; margin:0 0 12px; letter-spacing:-.01em;}
+  h2{font-size:21px; font-weight:700; margin:0 0 6px;}
+  h3{font-size:15px; font-weight:700; margin:0 0 4px;}
+  .sub{color:var(--ink-2); font-size:15px;}
+  .tag{display:inline-block; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:#fff; background:var(--magenta); padding:4px 11px; border-radius:6px; margin-bottom:16px;}
+
+  .hero{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:26px 28px; margin-bottom:26px;}
+  .hero p{margin:10px 0 0; font-size:15px; color:var(--ink-2); max-width:80ch;}
+
+  /* principle chips */
+  .principles{display:flex; flex-wrap:wrap; gap:10px; margin-top:18px;}
+  .pchip{font-size:12.5px; background:var(--page); border:1px solid var(--line-2); border-radius:999px; padding:6px 13px; color:var(--ink-2);}
+  .pchip b{color:var(--ink);}
+
+  /* stage rail */
+  .rail{display:flex; flex-wrap:wrap; gap:8px; margin:28px 0 8px; counter-reset:st;}
+  .rstep{flex:1 1 150px; background:var(--card); border:1px solid var(--line); border-top:3px solid var(--magenta); border-radius:10px; padding:11px 13px; min-width:140px;}
+  .rstep .n{font-size:11px; font-weight:700; color:var(--magenta); letter-spacing:.04em;}
+  .rstep .t{font-size:13.5px; font-weight:600; margin-top:2px; line-height:1.3;}
+  .rstep .c{font-size:11.5px; color:var(--ink-3); margin-top:3px;}
+
+  .section{margin:46px 0 0; scroll-margin-top:20px;}
+  .section-head{margin-bottom:18px; border-bottom:1px solid var(--line); padding-bottom:12px;}
+  .section-head .kicker{font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--magenta); margin-bottom:4px;}
+
+  /* stage layout: explanation + phone */
+  .stage{display:grid; grid-template-columns:1fr 360px; gap:34px; align-items:start; margin-bottom:10px;}
+  @media(max-width:880px){.stage{grid-template-columns:1fr;}}
+  .explain h2{margin-bottom:8px;}
+  .meta{display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 16px;}
+  .mtag{font-size:11.5px; padding:4px 10px; border-radius:6px; font-weight:600; border:1px solid var(--line-2);}
+  .mtag.trigger{background:#fff; color:var(--ink-2);}
+  .mtag.chan{background:var(--blue-soft); color:var(--blue); border-color:transparent;}
+  .mtag.tone-ok{background:var(--green-soft); color:var(--green); border-color:transparent;}
+  .mtag.tone-warn{background:var(--amber-soft); color:var(--amber); border-color:transparent;}
+  .mtag.tone-risk{background:var(--red-soft); color:var(--red); border-color:transparent;}
+
+  .explain ul{margin:10px 0 0; padding-left:18px;}
+  .explain li{font-size:14px; color:var(--ink-2); margin-bottom:7px;}
+  .explain li b{color:var(--ink);}
+  .why{margin-top:14px; font-size:13px; padding:11px 13px; background:#fff; border:1px dashed var(--line-2); border-radius:9px; color:var(--ink-2);}
+  .why b{color:var(--magenta);}
+  .copybox{margin-top:14px; border:1px solid var(--line); border-radius:10px; overflow:hidden;}
+  .copybox .ch{font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-3); background:var(--page); padding:7px 12px; border-bottom:1px solid var(--line);}
+  .copyrow{display:grid; grid-template-columns:88px 1fr; gap:0; font-size:13.5px; border-bottom:1px solid var(--line);}
+  .copyrow:last-child{border-bottom:none;}
+  .copyrow .k{background:#fff; color:var(--ink-3); padding:8px 12px; font-size:11.5px; border-right:1px solid var(--line); font-weight:600;}
+  .copyrow .v{padding:8px 12px;}
+  .copyrow .v .en{color:var(--ink-3); font-size:12px; display:block; margin-top:2px;}
+
+  /* ===== PHONE MOCKUP (Wiom app, 360px frame scaled) ===== */
+  .phone-wrap{position:sticky; top:18px;}
+  .phone{width:340px; border-radius:30px; background:#000; padding:9px; box-shadow:0 12px 34px rgba(22,16,33,.22); margin:0 auto;}
+  .screen{background:var(--w-screen); border-radius:23px; overflow:hidden; height:660px; display:flex; flex-direction:column; position:relative;}
+  .caption{text-align:center; font-size:12px; color:var(--ink-3); margin-top:10px;}
+
+  .w-header{background:var(--w-secondary); color:#fff; padding:14px 16px; display:flex; align-items:center; gap:12px; flex:none;}
+  .w-header .menu{font-size:18px; opacity:.9;}
+  .w-header .title{font-size:16px; font-weight:600; flex:1;}
+  .w-header .ic{font-size:16px; opacity:.85;}
+
+  .w-body{flex:1; overflow:hidden; padding:0; position:relative;}
+  .w-scroll{padding:14px 14px 18px; height:100%; overflow:hidden;}
+
+  /* app banner */
+  .w-banner{display:flex; gap:0; border-radius:12px; overflow:hidden; margin-bottom:12px; border:1px solid transparent;}
+  .w-banner .accent{width:4px; flex:none;}
+  .w-banner .bbody{padding:11px 12px; display:flex; gap:9px; align-items:flex-start; flex:1;}
+  .w-banner .bi{font-size:16px; line-height:1.3; flex:none;}
+  .w-banner .bt{font-size:13px; font-weight:600; line-height:1.45;}
+  .w-banner .bs{font-size:12px; line-height:1.4; margin-top:2px; opacity:.92;}
+  .w-banner .arr{align-self:center; opacity:.5; font-size:15px; padding-left:4px;}
+  .w-banner.info{background:var(--w-info-bg);} .w-banner.info .accent{background:var(--w-info);} .w-banner.info .bi,.w-banner.info .bt{color:var(--w-info);} .w-banner.info .bs{color:#4a2a86;}
+  .w-banner.warn{background:var(--w-caution-bg);} .w-banner.warn .accent{background:var(--w-caution);} .w-banner.warn .bi,.w-banner.warn .bt{color:var(--w-caution);} .w-banner.warn .bs{color:#5e4a00;}
+  .w-banner.crit{background:var(--w-neg-bg);} .w-banner.crit .accent{background:var(--w-neg);} .w-banner.crit .bi,.w-banner.crit .bt{color:var(--w-neg);} .w-banner.crit .bs{color:#8a1620;}
+  .w-banner.ok{background:var(--w-pos-bg);} .w-banner.ok .accent{background:var(--w-pos);} .w-banner.ok .bi,.w-banner.ok .bt{color:var(--w-pos);} .w-banner.ok .bs{color:#0a5e32;}
+
+  /* assurance chip grid */
+  .chip-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px;}
+  .a-chip{background:#fff; border:1px solid var(--w-stroke); border-radius:8px; padding:12px; position:relative; min-height:74px;}
+  .a-chip .lbl{font-size:11px; font-weight:600; color:var(--w-text-2);}
+  .a-chip .val{font-size:20px; font-weight:700; color:var(--w-text); line-height:1.5; margin-top:2px;}
+  .a-chip .sec{font-size:11px; color:var(--w-text-2);}
+  .a-chip .warnote{font-size:11px; color:var(--w-warn); font-weight:600; margin-top:2px;}
+  .a-chip .oknote{font-size:11px; color:var(--w-pos); font-weight:600; margin-top:2px;}
+  .a-chip .dot{position:absolute; top:9px; right:9px; width:8px; height:8px; border-radius:50%; background:var(--w-brand);}
+  .a-chip.mbg{border-color:var(--w-brand-stroke); background:linear-gradient(180deg,#fff,var(--w-brand-tint));}
+
+  /* MBG hero progress card */
+  .mbg-card{background:#fff; border:1px solid var(--w-brand-stroke); border-radius:16px; padding:15px; margin-bottom:13px; box-shadow:0 2px 6px rgba(0,0,0,.05);}
+  .mbg-card .mc-top{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:3px;}
+  .mbg-card .mc-title{font-size:13px; font-weight:700; color:var(--w-text);}
+  .mbg-card .mc-days{font-size:11px; color:var(--w-text-2);}
+  .mbg-card .mc-amt{font-size:26px; font-weight:700; line-height:1.2; margin:4px 0 2px;}
+  .mbg-card .mc-amt small{font-size:12px; font-weight:600; color:var(--w-text-2);}
+  .mbg-card .mc-sub{font-size:11.5px; color:var(--w-text-2); margin-bottom:11px;}
+  /* gate gauge */
+  .gauge{position:relative; height:10px; background:var(--w-stroke); border-radius:5px; margin:7px 0 4px;}
+  .gauge .fill{position:absolute; left:0; top:0; bottom:0; border-radius:5px;}
+  .gauge .mark{position:absolute; left:70%; top:-4px; bottom:-4px; width:2px; background:var(--w-text);}
+  .gauge .mark::after{content:"70%"; position:absolute; top:-15px; left:50%; transform:translateX(-50%); font-size:9.5px; color:var(--w-text-2); white-space:nowrap;}
+  .gauge.g-ok .fill{background:var(--w-pos);} .gauge.g-warn .fill{background:var(--w-caution);} .gauge.g-bad .fill{background:var(--w-neg);}
+  .gauge-row{display:flex; justify-content:space-between; font-size:10.5px; color:var(--w-text-2); margin-top:7px;}
+  .mc-stats{display:flex; gap:0; margin-top:11px; border-top:1px solid var(--w-stroke); padding-top:10px;}
+  .mc-stat{flex:1; text-align:center;}
+  .mc-stat .s-v{font-size:16px; font-weight:700; color:var(--w-text);}
+  .mc-stat .s-l{font-size:10px; color:var(--w-text-2);}
+  .mc-stat + .mc-stat{border-left:1px solid var(--w-stroke);}
+
+  /* generic app card / list rows */
+  .w-card{background:#fff; border:1px solid var(--w-stroke); border-radius:12px; padding:13px; margin-bottom:11px;}
+  .w-card .ct{font-size:13px; font-weight:700;}
+  .w-card .cb{font-size:12px; color:var(--w-text-2); margin-top:3px; line-height:1.5;}
+  .task-card{background:#fff; border:1px solid var(--w-stroke); border-left:4px solid var(--w-text-3); border-radius:12px; padding:11px 12px; margin-bottom:9px;}
+  .task-card.warn{border-left-color:var(--w-caution);}
+  .task-card .tl1{font-size:12.5px; font-weight:600;}
+  .task-card .tl2{font-size:11.5px; color:var(--w-text-2); margin-top:2px;}
+
+  /* CTA button */
+  .w-cta{display:block; width:100%; text-align:center; background:var(--w-brand); color:#fff; font-size:14.5px; font-weight:700; padding:13px; border-radius:16px; border:none; margin-top:4px;}
+  .w-cta.sec{background:var(--w-brand-tint); color:var(--w-brand);}
+  .w-cta.ghost{background:transparent; color:var(--w-text-2); font-weight:600;}
+
+  /* bottom sheet overlay inside phone */
+  .sheet-scrim{position:absolute; inset:0; background:rgba(22,16,33,.45); display:flex; align-items:flex-end;}
+  .sheet{background:var(--w-screen); width:100%; border-radius:24px 24px 0 0; padding:20px 18px calc(18px); max-height:92%; overflow:hidden;}
+  .sheet .circ{width:74px; height:74px; border-radius:50%; margin:2px auto 12px; display:flex; align-items:center; justify-content:center; font-size:32px;}
+  .sheet .circ.info{background:var(--w-info-bg);}
+  .sheet .circ.ok{background:var(--w-pos-bg);}
+  .sheet .circ.warn{background:var(--w-caution-bg);}
+  .sheet .circ.brand{background:var(--w-brand-tint);}
+  .sheet .sh-title{font-size:20px; font-weight:700; text-align:center; line-height:1.3;}
+  .sheet .sh-sub{font-size:13.5px; color:var(--w-text-2); text-align:center; margin-top:8px; line-height:1.5;}
+  .compact{margin:15px 0 4px; display:flex; flex-direction:column; gap:9px;}
+  .compact .crow{display:flex; gap:10px; align-items:flex-start; background:#fff; border:1px solid var(--w-stroke); border-radius:12px; padding:11px 12px;}
+  .compact .crow .ci{font-size:18px; flex:none;}
+  .compact .crow .cw{font-size:12.5px; color:var(--w-text); line-height:1.45;}
+  .compact .crow .cw b{color:var(--w-brand);}
+  .terms{font-size:11px; color:var(--w-text-3); text-align:center; margin:12px 0 14px; line-height:1.5;}
+
+  /* dialog (centered) */
+  .dialog-scrim{position:absolute; inset:0; background:rgba(22,16,33,.5); display:flex; align-items:center; justify-content:center; padding:22px;}
+  .dialog{background:var(--w-screen); border-radius:24px; padding:22px 20px; width:100%; text-align:center;}
+  .dialog .circ{width:96px; height:96px; border-radius:50%; margin:0 auto 14px; display:flex; align-items:center; justify-content:center; font-size:44px;}
+
+  /* toast */
+  .toast{position:absolute; left:12px; right:12px; bottom:14px; background:#fff; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,.18); padding:13px 14px; display:flex; gap:10px; align-items:center; font-size:13px;}
+  .toast .ti{font-size:17px;} .toast.ok{border-left:4px solid var(--w-pos);} .toast.info{border-left:4px solid var(--w-info);}
+
+  /* push notification */
+  .push{background:rgba(255,255,255,.96); backdrop-filter:blur(4px); border-radius:16px; margin:10px; padding:11px 13px; box-shadow:0 4px 14px rgba(0,0,0,.18); display:flex; gap:10px;}
+  .push .logo{width:30px; height:30px; border-radius:8px; background:var(--w-brand); color:#fff; font-weight:700; display:flex; align-items:center; justify-content:center; font-size:14px; flex:none;}
+  .push .pt{font-size:12.5px; font-weight:700;}
+  .push .pb{font-size:12px; color:var(--w-text-2); margin-top:1px; line-height:1.4;}
+  .push .pmeta{font-size:10px; color:var(--w-text-3); margin-top:3px;}
+  .lockwall{background:linear-gradient(160deg,#5b4570,#2c2038); height:100%; display:flex; flex-direction:column;}
+  .lockclock{color:#fff; text-align:center; margin-top:46px;}
+  .lockclock .lt{font-size:48px; font-weight:300; letter-spacing:.02em;}
+  .lockclock .ld{font-size:13px; opacity:.85;}
+
+  /* matrix table */
+  table.grid{width:100%; border-collapse:collapse; font-size:13.5px; background:var(--card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;}
+  table.grid th{background:var(--page); text-align:left; padding:10px 13px; font-size:11.5px; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2); border-bottom:1px solid var(--line);}
+  table.grid td{padding:10px 13px; border-bottom:1px solid var(--line); vertical-align:top;}
+  table.grid tr:last-child td{border-bottom:none;}
+  table.grid td b{color:var(--ink);}
+  .badge{display:inline-block; font-size:11px; font-weight:700; padding:2px 8px; border-radius:5px;}
+  .b-info{background:var(--blue-soft); color:var(--blue);} .b-ok{background:var(--green-soft); color:var(--green);}
+  .b-warn{background:var(--amber-soft); color:var(--amber);} .b-risk{background:var(--red-soft); color:var(--red);} .b-brand{background:#FCE3F3; color:var(--magenta);}
+
+  .note{margin-top:14px; font-size:13px; color:var(--ink-2); background:#fff; border:1px solid var(--line); border-left:3px solid var(--magenta); border-radius:10px; padding:13px 15px;}
+  .note b{color:var(--ink);}
+  .fine{margin-top:30px; font-size:12px; color:var(--ink-3); border-top:1px solid var(--line); padding-top:16px;}
+  .two{display:grid; grid-template-columns:1fr 1fr; gap:18px;} @media(max-width:880px){.two{grid-template-columns:1fr;}}
+  code{background:var(--page); border:1px solid var(--line); border-radius:5px; padding:1px 6px; font-size:12.5px; color:var(--magenta);}
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid #EAE7DF;box-shadow:0 1px 6px rgba(22,16,33,.05)">
+  <div style="max-width:1180px;margin:0 auto;padding:10px 22px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <span style="font-size:13px;font-weight:700;color:#D9008D;margin-right:6px;letter-spacing:.02em">MBG ·</span>
+    <a href="https://ashishagrawal-iam.github.io/MBG_v1/" style="padding:7px 15px;border-radius:999px;font-size:13px;font-weight:700;text-decoration:none;background:#D9008D;color:#fff;border:1px solid #D9008D">Full Journey · Vision</a>
+    <a href="https://ashishagrawal-iam.github.io/MBG_v1/v1.html" style="padding:7px 15px;border-radius:999px;font-size:13px;font-weight:600;text-decoration:none;color:#5C5570;border:1px solid #D8D4CA">v1 · Ship Now</a>
+    <a href="https://ashishagrawal-iam.github.io/MBG_v1/optin-v0.html" style="padding:7px 15px;border-radius:999px;font-size:13px;font-weight:600;text-decoration:none;color:#5C5570;border:1px solid #D8D4CA">OptIn V0</a>
+    <a href="https://ashishagrawal-iam.github.io/MBG_v1/prototype.html" style="padding:7px 15px;border-radius:999px;font-size:13px;font-weight:600;text-decoration:none;color:#5C5570;border:1px solid #D8D4CA">Prototype</a>
+  </div>
+</div>
+<div class="wrap">
+
+  <span class="tag">Internal — Solution Design · CSP App</span>
+  <div class="hero">
+    <p class="eyebrow">Wiom · Minimum Business Guarantee · In-app communication journey · Jul–Sep 2026</p>
+    <h1>MBG — the CSP's in-app journey</h1>
+    <p>A stage-by-stage communication plan for the <b>Minimum Business Guarantee</b> inside the Wiom CSP app — from first hearing about the scheme, to opting in, to seeing eligibility update day-to-day, to being warned when at-risk, to the moment a parameter fails, through to payout and the September sunset. Each stage names the <b>trigger</b>, the <b>app surface</b> it uses (built on existing components — banner, assurance chip, bottom sheet, toast, dialog), the <b>Hindi-first copy</b>, and a <b>screen mockup</b> rendered in the real Wiom design tokens.</p>
+    <div class="principles">
+      <span class="pchip"><b>One-sentence rule (BV4):</b> the CSP must understand MBG in a single line</span>
+      <span class="pchip"><b>Sunset framing:</b> "3-month volume bridge", never "Wiom is investing in you" — avoids the Ola-2017 backlash</span>
+      <span class="pchip"><b>No-blame (Wiom way):</b> a miss is reframed as next-month opportunity; volume shortfalls are owned by Wiom, not the CSP</span>
+      <span class="pchip"><b>Show the cliff with eyes open:</b> the 70% gate is never hidden — it is turned into a "one more install" nudge</span>
+      <span class="pchip"><b>Hindi-first:</b> all copy in Noto Sans Devanagari, warm register</span>
+      <span class="pchip"><b>Server-driven:</b> banners, chips & sheets carry no hardcoded state — same render pipeline the app already uses</span>
+    </div>
+  </div>
+
+  <!-- STAGE RAIL -->
+  <div class="rail">
+    <a class="rstep" href="#s1" style="text-decoration:none;color:inherit"><div class="n">STAGE 1</div><div class="t">Awareness</div><div class="c">Hears about MBG</div></a>
+    <a class="rstep" href="#s2" style="text-decoration:none;color:inherit"><div class="n">STAGE 2</div><div class="t">Opt-in / Compact</div><div class="c">Both sides commit</div></a>
+    <a class="rstep" href="#s3" style="text-decoration:none;color:inherit"><div class="n">STAGE 3</div><div class="t">Activated</div><div class="c">MBG goes live</div></a>
+    <a class="rstep" href="#s4" style="text-decoration:none;color:inherit"><div class="n">STAGE 4</div><div class="t">Day-to-day</div><div class="c">Live eligibility</div></a>
+    <a class="rstep" href="#s5" style="text-decoration:none;color:inherit"><div class="n">STAGE 5</div><div class="t">On-track</div><div class="c">Gate cleared</div></a>
+    <a class="rstep" href="#s6" style="text-decoration:none;color:inherit"><div class="n">STAGE 6</div><div class="t">At-risk</div><div class="c">Near the cliff</div></a>
+    <a class="rstep" href="#s7" style="text-decoration:none;color:inherit"><div class="n">STAGE 7</div><div class="t">Parameter failing</div><div class="c">Which one & why</div></a>
+    <a class="rstep" href="#s8" style="text-decoration:none;color:inherit"><div class="n">STAGE 8</div><div class="t">Outcome</div><div class="c">Payout or miss</div></a>
+    <a class="rstep" href="#s9" style="text-decoration:none;color:inherit"><div class="n">STAGE 9</div><div class="t">Settlement</div><div class="c">~14 days later</div></a>
+    <a class="rstep" href="#s10" style="text-decoration:none;color:inherit"><div class="n">STAGE 10</div><div class="t">Sunset</div><div class="c">Hand-off to Ladder</div></a>
+  </div>
+  <p class="sub" style="margin-top:6px;font-size:13px;color:var(--ink-3)">The journey mirrors the Cold Start staged solution: Stages 1–9 are the <b>Igniter</b> (Compact + Guarantee); Stage 10 is the controlled hand-off to the <b>Earned-Flow Ladder</b> (the persistence rail).</p>
+
+  <!-- ===================== STAGE 1 ===================== -->
+  <div class="section" id="s1">
+    <div class="section-head"><div class="kicker">Stage 1 · Awareness</div><h2>The CSP hears about MBG</h2><p class="sub">A signed-and-shortlisted CSP needs to learn the scheme exists and grasp it in one line — before any sign-up friction.</p></div>
+    <div class="stage">
+      <div class="explain">
+        <div class="meta">
+          <span class="mtag trigger">Trigger: scheme launch / CSP shortlisted</span>
+          <span class="mtag chan">Push (CleverTap) → Home banner → Info sheet</span>
+          <span class="mtag tone-warn">Tone: opportunity</span>
+        </div>
+        <p class="sub">Three touchpoints, escalating in detail. The push pulls them in; the home banner persists until acknowledged; the info sheet does the actual explaining — and stops at the one-sentence rule before offering "learn the terms".</p>
+        <ul>
+          <li><b>Push notification</b> on the lock screen — single benefit hook, deep-links to Home (CleverTap in-apps are Home-allowlisted, so the banner is waiting when they land).</li>
+          <li><b>Home info banner</b> (purple <code>INFO</code> severity) sits above the assurance strip; tapping opens the sheet. Dismissible, but reappears until opt-in.</li>
+          <li><b>Info bottom sheet</b> leads with the <b>one-sentence definition</b> (BV4), then the two-way promise, then the hard <b>3-month window</b> so temporariness is felt from word one.</li>
+        </ul>
+        <div class="why"><b>Why this framing:</b> the sheet says "<span class="hi">यह मौका सिर्फ़ 3 महीने का है — अभी क्षमता बनाएँ</span>" (a 3-month window — build capacity now), <i>not</i> "Wiom is investing in your business." Same content, but the first makes the September sunset feel built-in and sidesteps the Ola-2017 entitlement trap flagged in the Cold Start analysis.</div>
+        <div class="copybox">
+          <div class="ch">Copy</div>
+          <div class="copyrow"><div class="k">Push</div><div class="v"><span class="hi">🎉 नया मौका — आपकी कमाई की गारंटी</span><span class="en">New opportunity — your earnings, guaranteed</span></div></div>
+          <div class="copyrow"><div class="k">Push body</div><div class="v"><span class="hi">जुलाई–सितंबर: हर महीने ₹5,000 तक पक्के। देखें कैसे →</span><span class="en">Jul–Sep: up to ₹5,000 every month, assured. See how →</span></div></div>
+          <div class="copyrow"><div class="k">Banner</div><div class="v"><span class="hi">₹5,000 मासिक कमाई गारंटी · 3 महीने का खास मौका</span></div></div>
+          <div class="copyrow"><div class="k">Sheet H1</div><div class="v"><span class="hi">अब हर महीने ₹5,000 तक पक्के</span></div></div>
+          <div class="copyrow"><div class="k">One-liner</div><div class="v"><span class="hi">मिली हुई लीड में से 70% इंस्टॉल करें — महीने में कम से कम ₹5,000 की गारंटी।</span></div></div>
+        </div>
+      </div>
+      <div class="phone-wrap">
+        <div class="phone"><div class="screen">
+          <div class="lockwall">
+            <div class="lockclock"><div class="lt">9:41</div><div class="ld hi">सोमवार, 1 जुलाई</div></div>
+            <div class="push">
+              <div class="logo">W</div>
+              <div><div class="pt hi">🎉 नया मौका — आपकी कमाई की गारंटी</div><div class="pb hi">जुलाई–सितंबर: हर महीने ₹5,000 तक पक्के। देखें कैसे →</div><div class="pmeta">Wiom CSP · now</div></div>
+            </div>
+          </div>
+        </div></div>
+        <div class="caption">Lock-screen push → deep-links to Home</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== STAGE 2 ===================== -->
+  <div class="section" id="s2">
+    <div class="section-head"><div class="kicker">Stage 2 · Opt-in (the Mutual Compact)</div><h2>Both sides commit</h2><p class="sub">Opt-in <i>is</i> the Mutual Compact. The sheet shows what Wiom commits and what the CSP commits, side by side — the contractual rail that makes behaviour persist.</p></div>
+    <div class="stage">
+      <div class="explain">
+        <div class="meta">
+          <span class="mtag trigger">Trigger: taps "जानें / शामिल हों"</span>
+          <span class="mtag chan">Compact bottom sheet → confirm → toast</span>
+          <span class="mtag tone-warn">Tone: mutual, plain</span>
+        </div>
+        <ul>
+          <li><b>Two-way commitment, visible.</b> The sheet renders Wiom's promise (<b>weekly leads</b>) and the CSP's promise (<b>70% install rate</b>) as paired rows — the compact's "neither side moves first" deadlock-breaker made literal.</li>
+          <li><b>The make-good is the safety net.</b> Copy states plainly: if Wiom under-delivers on leads, the ₹5,000 floor protects the CSP — this is the Income-Guarantee leg fused into the Compact.</li>
+          <li><b>Terms in plain Hindi, not legalese:</b> ≥3 leads needed, 70% gate, paid ~14 days after month-end. One tap to accept.</li>
+          <li>On confirm: a success <b>toast</b>, the home <b>MBG card</b> appears, and the info banner retires.</li>
+        </ul>
+        <div class="why"><b>Why a compact, not just a payout:</b> Wiom's own ₹0→₹300 history proved per-install rate isn't the binding constraint — <b>volume predictability</b> is. So the headline commitment the CSP sees is Wiom's lead promise, not the rupee number. That is the lever the Cold Start decision is built on.</div>
+        <div class="copybox">
+          <div class="ch">Copy</div>
+          <div class="copyrow"><div class="k">Wiom side</div><div class="v"><span class="hi">हम हर हफ्ते आपको पक्की लीड भेजेंगे</span></div></div>
+          <div class="copyrow"><div class="k">CSP side</div><div class="v"><span class="hi">आप मिली लीड में से 70% इंस्टॉल पूरे करें</span></div></div>
+          <div class="copyrow"><div class="k">Safety net</div><div class="v"><span class="hi">कम लीड मिलें तो भी ₹5,000 की गारंटी आपके साथ</span></div></div>
+          <div class="copyrow"><div class="k">Terms</div><div class="v"><span class="hi">महीने में कम से कम 3 लीड · 70% इंस्टॉल · राशि महीना खत्म होने के 14 दिन में</span></div></div>
+          <div class="copyrow"><div class="k">CTA</div><div class="v"><span class="hi">मैं तैयार हूँ — शामिल हों</span></div></div>
+          <div class="copyrow"><div class="k">Toast</div><div class="v"><span class="hi">बधाई हो! आप MBG में शामिल हैं ✅</span></div></div>
+        </div>
+      </div>
+      <div class="phone-wrap">
+        <div class="phone"><div class="screen">
+          <div class="w-header"><span class="menu">☰</span><span class="title hi">होम</span><span class="ic">🔔</span></div>
+          <div class="w-body">
+            <div class="w-scroll" style="filter:blur(1.5px)">
+              <div class="chip-grid">
+                <div class="a-chip"><div class="lbl hi">आपकी कमाई</div><div class="val">₹2,400</div></div>
+                <div class="a-chip"><div class="lbl hi">क्वालिटी</div><div class="val" style="color:var(--w-pos)">✅</div></div>
+              </div>
+            </div>
+            <div class="sheet-scrim">
+              <div class="sheet">
+                <div class="circ brand">🤝</div>
+                <div class="sh-title hi">आपसी वादा — MBG</div>
+                <div class="sh-sub hi">दोनों तरफ से एक-एक वादा। यही आपकी कमाई पक्की करता है।</div>
+                <div class="compact">
+                  <div class="crow"><span class="ci">📩</span><span class="cw hi"><b>Wiom का वादा:</b> हर हफ्ते आपको पक्की लीड भेजेंगे</span></div>
+                  <div class="crow"><span class="ci">🔧</span><span class="cw hi"><b>आपका वादा:</b> मिली लीड में से 70% इंस्टॉल पूरे करें</span></div>
+                  <div class="crow"><span class="ci">🛡️</span><span class="cw hi"><b>गारंटी:</b> कम लीड मिलें तो भी महीने में ₹5,000 पक्के</span></div>
+                </div>
+                <div class="terms hi">महीने में कम से कम 3 लीड ज़रूरी · राशि महीना खत्म होने के 14 दिन में वॉलेट में</div>
+                <button class="w-cta hi">मैं तैयार हूँ — शामिल हों</button>
+                <button class="w-cta ghost hi">बाद में</button>
+              </div>
+            </div>
+          </div>
+        </div></div>
+        <div class="caption">Compact bottom sheet — <code>WiomConfirmBottomSheet</code> pattern</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== STAGE 3 ===================== -->
+  <div class="section" id="s3">
+    <div class="section-head"><div class="kicker">Stage 3 · Activated</div><h2>MBG goes live on the home screen</h2><p class="sub">The moment after opt-in: a confirmation, and a permanent home for the scheme so the CSP always knows where to look.</p></div>
+    <div class="stage">
+      <div class="explain">
+        <div class="meta">
+          <span class="mtag trigger">Trigger: opt-in confirmed</span>
+          <span class="mtag chan">Success toast + new MBG home card + assurance chip</span>
+          <span class="mtag tone-ok">Tone: warm welcome</span>
+        </div>
+        <ul>
+          <li><b>Success toast</b> (<code>WiomToast</code>, Success) confirms enrolment without blocking the screen.</li>
+          <li>A new <b>MBG progress card</b> is inserted at the top of the home feed — the scheme's permanent home. On day 1 it shows the month's starting state and the days-left counter, so the clock is visible immediately.</li>
+          <li>A compact <b>"गारंटी" assurance chip</b> joins the 2×2 strip, mirroring the existing earnings/quality chips, so MBG lives alongside metrics the CSP already checks daily.</li>
+        </ul>
+        <div class="why"><b>Why a persistent card, not just a one-time popup:</b> the Compact is a 3-month relationship, not an announcement. A standing surface that updates daily is what turns "I signed up for something" into "I can see my guarantee filling up."</div>
+      </div>
+      <div class="phone-wrap">
+        <div class="phone"><div class="screen">
+          <div class="w-header"><span class="menu">☰</span><span class="title hi">होम</span><span class="ic">🔔</span></div>
+          <div class="w-body"><div class="w-scroll">
+            <div class="mbg-card">
+              <div class="mc-top"><span class="mc-title hi">इस महीने की गारंटी</span><span class="mc-days hi">शुरू हुआ · 1 जुलाई</span></div>
+              <div class="mc-amt hi">₹5,000 <small>तक की गारंटी</small></div>
+              <div class="mc-sub hi">जैसे-जैसे आप इंस्टॉल पूरे करेंगे, यहाँ दिखेगा।</div>
+              <div class="gauge g-warn"><div class="fill" style="width:0%"></div><div class="mark"></div></div>
+              <div class="gauge-row"><span class="hi">इंस्टॉल दर 0%</span><span class="hi">लक्ष्य 70%</span></div>
+              <div class="mc-stats">
+                <div class="mc-stat"><div class="s-v">0</div><div class="s-l hi">लीड मिलीं</div></div>
+                <div class="mc-stat"><div class="s-v">0</div><div class="s-l hi">इंस्टॉल</div></div>
+                <div class="mc-stat"><div class="s-v">31</div><div class="s-l hi">दिन बाकी</div></div>
+              </div>
+            </div>
+            <div class="chip-grid">
+              <div class="a-chip mbg"><div class="lbl hi">गारंटी</div><div class="val" style="color:var(--w-brand)">चालू</div><div class="sec hi">MBG · जुलाई</div></div>
+              <div class="a-chip"><div class="lbl hi">आपकी कमाई</div><div class="val">₹0</div></div>
+            </div>
+            <div class="task-card"><div class="tl1 hi">कोई काम नहीं</div><div class="tl2 hi">नई लीड आते ही यहाँ दिखेगी।</div></div>
+          </div>
+          <div class="toast ok"><span class="ti">✅</span><span class="hi">बधाई हो! आप MBG में शामिल हैं</span></div>
+          </div>
+        </div></div>
+        <div class="caption">Home after opt-in — MBG card + chip + success toast</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== STAGE 4 ===================== -->
+  <div class="section" id="s4">
+    <div class="section-head"><div class="kicker">Stage 4 · Day-to-day eligibility</div><h2>The guarantee updates live</h2><p class="sub">This is the in-app version of the MBG simulator. The CSP can see, any day, exactly where they stand against the 70% gate and what they're projected to earn.</p></div>
+    <div class="stage">
+      <div class="explain">
+        <div class="meta">
+          <span class="mtag trigger">Trigger: each lead assigned / install completed</span>
+          <span class="mtag chan">MBG card (live) + tap → MBG drilldown screen</span>
+          <span class="mtag tone-ok">Tone: factual, encouraging</span>
+        </div>
+        <ul>
+          <li>The card's <b>gauge</b> is the simulator's gate-track: fill = current install rate, fixed mark at <b>70%</b>. Green once cleared, amber while below.</li>
+          <li><b>Three live stats</b> mirror the locked spec exactly — <b>leads assigned</b> (assignment-date cohort = denominator), <b>installs</b> (numerator), <b>days left</b> in the calendar month.</li>
+          <li><b>Projected payout</b> uses the locked formula <code>max(₹300×installs, ₹5,000)</code> once the gate is cleared, shown as "अनुमानित" (estimated) so it never reads as a promise mid-month.</li>
+          <li>Tapping opens a full <b>MBG drilldown</b> (new screen in the home graph, alongside the existing earnings drilldown): per-lead status, the 14-day maturity clock on each open lead, and a plain-language "how it's calculated".</li>
+        </ul>
+        <div class="why"><b>Why expose the mechanism:</b> volume <i>predictability</i> is the product. A CSP who can watch the gauge fill trusts the guarantee; a black-box payout rebuilds the very uncertainty MBG exists to remove.</div>
+        <div class="copybox">
+          <div class="ch">Copy</div>
+          <div class="copyrow"><div class="k">Card title</div><div class="v"><span class="hi">इस महीने की गारंटी</span></div></div>
+          <div class="copyrow"><div class="k">Projection</div><div class="v"><span class="hi">अनुमानित कमाई: ₹5,000</span></div></div>
+          <div class="copyrow"><div class="k">Stat row</div><div class="v"><span class="hi">लीड मिलीं · इंस्टॉल · दिन बाकी</span></div></div>
+        </div>
+      </div>
+      <div class="phone-wrap">
+        <div class="phone"><div class="screen">
+          <div class="w-header"><span class="menu">☰</span><span class="title hi">होम</span><span class="ic">🔔</span></div>
+          <div class="w-body"><div class="w-scroll">
+            <div class="mbg-card">
+              <div class="mc-top"><span class="mc-title hi">इस महीने की गारंटी</span><span class="mc-days hi">12 दिन बाकी</span></div>
+              <div class="mc-amt" style="color:var(--w-pos)">₹5,000 <small class="hi">अनुमानित कमाई</small></div>
+              <div class="mc-sub hi">शानदार! आप गारंटी पर हैं। ऐसे ही जारी रखें।</div>
+              <div class="gauge g-ok"><div class="fill" style="width:80%"></div><div class="mark"></div></div>
+              <div class="gauge-row"><span class="hi">इंस्टॉल दर 80%</span><span class="hi">लक्ष्य 70% ✓</span></div>
+              <div class="mc-stats">
+                <div class="mc-stat"><div class="s-v">10</div><div class="s-l hi">लीड मिलीं</div></div>
+                <div class="mc-stat"><div class="s-v">8</div><div class="s-l hi">इंस्टॉल</div></div>
+                <div class="mc-stat"><div class="s-v">12</div><div class="s-l hi">दिन बाकी</div></div>
+              </div>
+              <button class="w-cta sec hi" style="margin-top:12px">पूरा हिसाब देखें</button>
+            </div>
+            <div class="chip-grid">
+              <div class="a-chip mbg"><div class="lbl hi">गारंटी</div><div class="val" style="color:var(--w-pos)">पक्की</div><div class="oknote hi">80% दर</div></div>
+              <div class="a-chip"><div class="lbl hi">आपकी कमाई</div><div class="val">₹2,400</div><div class="sec hi">+ ₹2,600 टॉप-अप</div></div>
+            </div>
+            <div class="task-card"><div class="tl1 hi">🔧 नया इंस्टॉल · #4471 · विकासनगर</div><div class="tl2 hi">आज शाम 5:00 बजे तक</div></div>
+            <div class="task-card"><div class="tl1 hi">🔧 नया इंस्टॉल · #4468 · शांति नगर</div><div class="tl2 hi">कल दोपहर तक</div></div>
+          </div></div>
+        </div></div>
+        <div class="caption">Live tracking — gauge + 3 stats mirror the locked spec</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== STAGE 5 ===================== -->
+  <div class="section" id="s5">
+    <div class="section-head"><div class="kicker">Stage 5 · On-track</div><h2>Gate cleared — two good states</h2><p class="sub">Once install rate ≥ 70%, the CSP is in one of the two winning states. The app celebrates both, and is explicit about the difference.</p></div>
+    <div class="two">
+      <div>
+        <h3>State B · Top-up <span class="badge b-info">make-good</span></h3>
+        <p class="sub" style="font-size:13.5px">Gate cleared, but <code>₹300 × installs</code> is below ₹5,000 — Wiom tops up to the floor. The card shows install pay <b>plus</b> the top-up, so the guarantee is visibly doing its job.</p>
+        <div class="phone-wrap" style="margin-top:12px">
+          <div class="phone"><div class="screen">
+            <div class="w-header"><span class="menu">☰</span><span class="title hi">होम</span><span class="ic">🔔</span></div>
+            <div class="w-body"><div class="w-scroll">
+              <div class="w-banner ok"><div class="accent"></div><div class="bbody"><span class="bi">✅</span><div><div class="bt hi">गारंटी पक्की!</div><div class="bs hi">80% दर — Wiom ₹2,600 जोड़कर ₹5,000 पूरे करेगा।</div></div></div></div>
+              <div class="mbg-card">
+                <div class="mc-top"><span class="mc-title hi">इस महीने की गारंटी</span><span class="mc-days hi">12 दिन बाकी</span></div>
+                <div class="mc-amt" style="color:var(--w-pos)">₹5,000</div>
+                <div class="mc-sub hi">इंस्टॉल कमाई ₹2,400 + टॉप-अप ₹2,600</div>
+                <div class="gauge g-ok"><div class="fill" style="width:80%"></div><div class="mark"></div></div>
+                <div class="gauge-row"><span class="hi">80%</span><span class="hi">लक्ष्य 70% ✓</span></div>
+                <div class="mc-stats">
+                  <div class="mc-stat"><div class="s-v">10</div><div class="s-l hi">लीड</div></div>
+                  <div class="mc-stat"><div class="s-v">8</div><div class="s-l hi">इंस्टॉल</div></div>
+                  <div class="mc-stat"><div class="s-v">₹2,600</div><div class="s-l hi">टॉप-अप</div></div>
+                </div>
+              </div>
+            </div></div>
+          </div></div>
+          <div class="caption">State B — top-up to floor</div>
+        </div>
+      </div>
+      <div>
+        <h3>State A · Above guarantee <span class="badge b-ok">auto-met</span></h3>
+        <p class="sub" style="font-size:13.5px">Enough installs that <code>₹300 × installs ≥ ₹5,000</code>. No top-up needed — the CSP has beaten the floor on their own. Copy celebrates the achievement, not Wiom's generosity.</p>
+        <div class="phone-wrap" style="margin-top:12px">
+          <div class="phone"><div class="screen">
+            <div class="w-header"><span class="menu">☰</span><span class="title hi">होम</span><span class="ic">🔔</span></div>
+            <div class="w-body"><div class="w-scroll">
+              <div class="w-banner ok"><div class="accent"></div><div class="bbody"><span class="bi">🌟</span><div><div class="bt hi">गारंटी से ऊपर!</div><div class="bs hi">आपने 18 इंस्टॉल किए — ₹5,400 पूरी आपकी कमाई।</div></div></div></div>
+              <div class="mbg-card">
+                <div class="mc-top"><span class="mc-title hi">इस महीने की गारंटी</span><span class="mc-days hi">9 दिन बाकी</span></div>
+                <div class="mc-amt" style="color:var(--w-pos)">₹5,400</div>
+                <div class="mc-sub hi">गारंटी ₹5,000 से ऊपर — कोई टॉप-अप नहीं चाहिए</div>
+                <div class="gauge g-ok"><div class="fill" style="width:100%"></div><div class="mark"></div></div>
+                <div class="gauge-row"><span class="hi">75% दर</span><span class="hi">लक्ष्य 70% ✓</span></div>
+                <div class="mc-stats">
+                  <div class="mc-stat"><div class="s-v">24</div><div class="s-l hi">लीड</div></div>
+                  <div class="mc-stat"><div class="s-v">18</div><div class="s-l hi">इंस्टॉल</div></div>
+                  <div class="mc-stat"><div class="s-v">₹5,400</div><div class="s-l hi">कमाई</div></div>
+                </div>
+              </div>
+            </div></div>
+          </div></div>
+          <div class="caption">State A — auto-met, above the floor</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== STAGE 6 ===================== -->
+  <div class="section" id="s6">
+    <div class="section-head"><div class="kicker">Stage 6 · At-risk</div><h2>Near the cliff — the "one more install" nudge</h2><p class="sub">The single highest-leverage moment in the whole journey. A CSP in the 60–69% band earns ₹0 make-good for almost the same work as one at 70%. The app's job: turn that cliff into a clear, cheap, achievable ask — before the month ends.</p></div>
+    <div class="stage">
+      <div class="explain">
+        <div class="meta">
+          <span class="mtag trigger">Trigger: rate in 60–69% OR slipping with open leads in hand</span>
+          <span class="mtag chan">Warning banner + chip warning + targeted push</span>
+          <span class="mtag tone-warn">Tone: encouraging, specific, never scolding</span>
+        </div>
+        <ul>
+          <li><b>Quantified nudge, not a vague warning.</b> The app computes <code>ceil(0.70 × leads) − installs</code> and tells the CSP the <i>exact</i> number of installs to cross the gate and the rupee value it unlocks — the simulator's nudge logic, surfaced live.</li>
+          <li><b>Caution banner</b> (<code>WARNING</code> severity, amber) on home; the assurance chip flips to "<span class="hi">जोखिम में</span>" with the warning style already supported (<code>bonusAtRisk</code>).</li>
+          <li>A <b>targeted push</b> fires when actionable leads are still in hand and time remains — the cheapest density Wiom can buy, aimed only at the near-miss cohort.</li>
+          <li>Tapping the banner opens a <b>nudge sheet</b> showing which open leads to close first (with their maturity clocks), so the ask is concrete.</li>
+        </ul>
+        <div class="why"><b>Why show the cliff openly:</b> hiding the 70% gate would make a later miss feel arbitrary and explosive. Naming it now — "<span class="hi">बस 1 और इंस्टॉल</span>" — converts a comms landmine into the most motivating message in the app.</div>
+        <div class="copybox">
+          <div class="ch">Copy</div>
+          <div class="copyrow"><div class="k">Banner</div><div class="v"><span class="hi">थोड़ा और! बस 1 इंस्टॉल से ₹5,000 की गारंटी पक्की</span></div></div>
+          <div class="copyrow"><div class="k">Chip</div><div class="v"><span class="hi">गारंटी जोखिम में · 60%</span></div></div>
+          <div class="copyrow"><div class="k">Push</div><div class="v"><span class="hi">आपके पास 2 खुली लीड हैं — 1 पूरी करें और ₹2,600 टॉप-अप पाएं</span></div></div>
+          <div class="copyrow"><div class="k">Sheet</div><div class="v"><span class="hi">अभी आपकी दर 60% है। 70% पार करने के लिए बस 1 और इंस्टॉल चाहिए — इससे ₹2,600 का टॉप-अप अनलॉक होगा।</span></div></div>
+        </div>
+      </div>
+      <div class="phone-wrap">
+        <div class="phone"><div class="screen">
+          <div class="w-header"><span class="menu">☰</span><span class="title hi">होम</span><span class="ic">🔔</span></div>
+          <div class="w-body"><div class="w-scroll">
+            <div class="w-banner warn"><div class="accent"></div><div class="bbody"><span class="bi">⚡</span><div><div class="bt hi">थोड़ा और! बस 1 इंस्टॉल बाकी</div><div class="bs hi">70% पार करें और ₹2,600 का टॉप-अप पाएं →</div></div><span class="arr">›</span></div></div>
+            <div class="mbg-card">
+              <div class="mc-top"><span class="mc-title hi">इस महीने की गारंटी</span><span class="mc-days hi">5 दिन बाकी</span></div>
+              <div class="mc-amt" style="color:var(--w-caution)">₹1,800 <small class="hi">अभी तक</small></div>
+              <div class="mc-sub hi">गारंटी पाने के लिए दर 70% चाहिए — आप बहुत करीब हैं।</div>
+              <div class="gauge g-warn"><div class="fill" style="width:60%"></div><div class="mark"></div></div>
+              <div class="gauge-row"><span class="hi">इंस्टॉल दर 60%</span><span class="hi">लक्ष्य 70%</span></div>
+              <div class="mc-stats">
+                <div class="mc-stat"><div class="s-v">10</div><div class="s-l hi">लीड मिलीं</div></div>
+                <div class="mc-stat"><div class="s-v">6</div><div class="s-l hi">इंस्टॉल</div></div>
+                <div class="mc-stat" style="color:var(--w-caution)"><div class="s-v">+1</div><div class="s-l hi">और चाहिए</div></div>
+              </div>
+              <button class="w-cta hi" style="margin-top:12px">कौन-सी लीड पहले पूरी करें</button>
+            </div>
+            <div class="task-card warn"><div class="tl1 hi">🔧 खुली लीड · #4471 · विकासनगर</div><div class="tl2 hi">2 दिन में पूरी करें</div></div>
+            <div class="task-card warn"><div class="tl1 hi">🔧 खुली लीड · #4468 · शांति नगर</div><div class="tl2 hi">4 दिन में पूरी करें</div></div>
+          </div></div>
+        </div></div>
+        <div class="caption">At-risk — quantified "+1 install" nudge</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== STAGE 7 ===================== -->
+  <div class="section" id="s7">
+    <div class="section-head"><div class="kicker">Stage 7 · Parameter-specific failure handling</div><h2>Which parameter is failing — and whose fault it is</h2><p class="sub">"At-risk" is not one thing. MBG has three independent gates, each with a different cause, a different owner, and therefore a different message. The app must name the <i>specific</i> failing parameter — never a generic "you're failing."</p></div>
+
+    <div class="meta">
+      <span class="mtag chan">Each maps to a distinct banner + drilldown reason</span>
+      <span class="mtag tone-risk">Tone: no-blame, owner-aware</span>
+    </div>
+
+    <table class="grid" style="margin-bottom:22px">
+      <thead><tr><th style="width:18%">Failing parameter</th><th style="width:20%">What the CSP sees</th><th style="width:24%">Hindi message</th><th>Why it's framed this way</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>Volume floor</b><br><span class="badge b-risk">&lt; 3 leads</span></td>
+          <td>MBG marked <b>"लागू नहीं"</b> (not applicable) — <i>not</i> a failure. Install pay still flows.</td>
+          <td class="hi">अभी आपको 3 से कम लीड मिली हैं, इसलिए इस महीने गारंटी लागू नहीं। यह आप पर निर्भर नहीं — हम आपके इलाके में और लीड भेजने पर काम कर रहे हैं।</td>
+          <td><b>Wiom owns this, not the CSP.</b> Low volume is a demand-side shortfall (the parallel intervention). Blaming the CSP for leads Wiom didn't send would break trust and the no-blame principle. Internally this fires a <b>cluster-escalation signal</b> to the demand team.</td>
+        </tr>
+        <tr>
+          <td><b>Rate gate</b><br><span class="badge b-warn">&lt; 70%, recoverable</span></td>
+          <td>The Stage-6 "+N installs" nudge, with exact count and unlock value.</td>
+          <td class="hi">आपकी दर 60% है। बस 1 और इंस्टॉल करें और ₹2,600 का टॉप-अप पाएं।</td>
+          <td><b>CSP-actionable, so it's a nudge.</b> While time and open leads remain, this is an opportunity, not a verdict. The cliff is shown openly to motivate, never to scold.</td>
+        </tr>
+        <tr>
+          <td><b>Maturity clock</b><br><span class="badge b-warn">14-day expiry</span></td>
+          <td>Per-lead countdown; leads nearing day 14 surface to the top with a warning accent.</td>
+          <td class="hi">2 लीड 3 दिन में पूरी होनी चाहिए, वरना रद्द मानी जाएँगी और आपकी दर पर असर पड़ेगा।</td>
+          <td>Explains the consequence (a lapsed lead counts as a non-install, pulling the rate down) <i>before</i> it bites — turning an invisible rule into an actionable reminder.</td>
+        </tr>
+        <tr>
+          <td><b>Rate gate</b><br><span class="badge b-risk">&lt; 70%, locked</span></td>
+          <td>Month-end reached below gate → Stage 8 "miss" outcome (handled gently, see below).</td>
+          <td class="hi">इस महीने दर 70% तक नहीं पहुँची — अगले महीने फिर पूरा मौका।</td>
+          <td>Once the month closes, the nudge becomes a soft close with a forward look. No dead-end messaging.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="two">
+      <div class="phone-wrap">
+        <div class="phone"><div class="screen">
+          <div class="w-header"><span class="menu">☰</span><span class="title hi">होम</span><span class="ic">🔔</span></div>
+          <div class="w-body"><div class="w-scroll">
+            <div class="w-banner info"><div class="accent"></div><div class="bbody"><span class="bi">📩</span><div><div class="bt hi">गारंटी इस महीने लागू नहीं</div><div class="bs hi">3 से कम लीड मिलीं — हम और लीड भेजने पर काम कर रहे हैं।</div></div></div></div>
+            <div class="mbg-card">
+              <div class="mc-top"><span class="mc-title hi">इस महीने की गारंटी</span><span class="mc-days hi">लागू नहीं</span></div>
+              <div class="mc-amt" style="color:var(--w-info)">₹600 <small class="hi">इंस्टॉल कमाई</small></div>
+              <div class="mc-sub hi">गारंटी के लिए महीने में कम से कम 3 लीड चाहिए। आपकी इंस्टॉल कमाई सुरक्षित है।</div>
+              <div class="mc-stats">
+                <div class="mc-stat"><div class="s-v">2</div><div class="s-l hi">लीड मिलीं</div></div>
+                <div class="mc-stat"><div class="s-v">2</div><div class="s-l hi">इंस्टॉल</div></div>
+                <div class="mc-stat"><div class="s-v">₹600</div><div class="s-l hi">कमाई</div></div>
+              </div>
+            </div>
+            <div class="w-card"><div class="ct hi">यह आपकी गलती नहीं</div><div class="cb hi">कम लीड मिलना डिमांड पर निर्भर है। हमारी टीम आपके इलाके में और ग्राहक लाने पर काम कर रही है।</div></div>
+          </div></div>
+        </div></div>
+        <div class="caption">Volume floor — "लागू नहीं", Wiom owns it</div>
+      </div>
+      <div class="phone-wrap">
+        <div class="phone"><div class="screen">
+          <div class="w-header"><span class="menu">☰</span><span class="title hi">गारंटी का हिसाब</span><span class="ic"></span></div>
+          <div class="w-body"><div class="w-scroll">
+            <div class="w-banner warn"><div class="accent"></div><div class="bbody"><span class="bi">⏳</span><div><div class="bt hi">2 लीड जल्द रद्द हो सकती हैं</div><div class="bs hi">3 दिन में पूरी करें, वरना दर पर असर पड़ेगा।</div></div></div></div>
+            <div class="w-card"><div class="ct hi">खुली लीड · 14 दिन की समय-सीमा</div></div>
+            <div class="task-card warn"><div class="tl1 hi">#4471 · विकासनगर</div><div class="tl2 hi" style="color:var(--w-caution)">⏳ 3 दिन बाकी</div></div>
+            <div class="task-card warn"><div class="tl1 hi">#4468 · शांति नगर</div><div class="tl2 hi" style="color:var(--w-caution)">⏳ 3 दिन बाकी</div></div>
+            <div class="task-card"><div class="tl1 hi">#4459 · राम नगर</div><div class="tl2 hi">⏳ 9 दिन बाकी</div></div>
+            <div class="w-card" style="background:var(--w-caution-bg);border-color:transparent"><div class="cb hi" style="color:#5e4a00">रद्द हुई लीड को "इंस्टॉल नहीं हुआ" गिना जाता है — इससे आपकी 70% दर नीचे आ सकती है।</div></div>
+          </div></div>
+        </div></div>
+        <div class="caption">Maturity clock — per-lead 14-day countdown</div>
+      </div>
+    </div>
+    <div class="note"><b>Design rule:</b> the app never shows the word "fail" / "<span class="hi">असफल</span>". A parameter not met is always paired with either (a) an action the CSP can take, or (b) an explicit statement that Wiom owns the shortfall. This is the no-blame principle operationalised at the parameter level.</div>
+  </div>
+
+  <!-- ===================== STAGE 8 ===================== -->
+  <div class="section" id="s8">
+    <div class="section-head"><div class="kicker">Stage 8 · Month-end outcome</div><h2>Payout — or a gentle miss</h2><p class="sub">When the month closes, the cohort resolves into one of the four canonical states. Two are celebrations; one is "not applicable"; one is the sensitive cliff-miss. Each gets its own dialog.</p></div>
+    <div class="two">
+      <div>
+        <h3>Qualified → payout <span class="badge b-ok">celebrate</span></h3>
+        <p class="sub" style="font-size:13.5px">Reuses the existing <code>InstallationCreditDialog</code> pattern — the CSP already associates that celebratory popup with money landing in the wallet. "<span class="hi">कमाई देखें</span>" routes straight to the wallet.</p>
+        <div class="phone-wrap" style="margin-top:12px">
+          <div class="phone"><div class="screen">
+            <div class="w-header"><span class="menu">☰</span><span class="title hi">होम</span><span class="ic">🔔</span></div>
+            <div class="w-body"><div class="w-scroll" style="filter:blur(1.5px)"><div class="mbg-card"><div class="mc-amt">₹5,000</div></div></div>
+              <div class="dialog-scrim"><div class="dialog">
+                <div class="circ" style="background:var(--w-pos-bg)">🎉</div>
+                <div class="sh-title hi">₹5,000 की गारंटी पूरी!</div>
+                <div class="sh-sub hi">जुलाई की गारंटी पक्की। ₹2,600 का टॉप-अप आपके वॉलेट में जोड़ दिया गया है।</div>
+                <button class="w-cta hi" style="margin-top:16px">कमाई देखें</button>
+                <button class="w-cta ghost hi">बंद करें</button>
+              </div></div>
+            </div>
+          </div></div>
+          <div class="caption">Qualified — celebration dialog → wallet</div>
+        </div>
+      </div>
+      <div>
+        <h3>Cliff miss <span class="badge b-risk">handle with care</span></h3>
+        <p class="sub" style="font-size:13.5px">Below 70% at close = ₹0 make-good. This is the comms landmine. The dialog is honest about the gate (shown with eyes open), reassures that install pay is <b>safe</b>, and pivots immediately to next month. No red, no "fail", no blame.</p>
+        <div class="phone-wrap" style="margin-top:12px">
+          <div class="phone"><div class="screen">
+            <div class="w-header"><span class="menu">☰</span><span class="title hi">होम</span><span class="ic">🔔</span></div>
+            <div class="w-body"><div class="w-scroll" style="filter:blur(1.5px)"><div class="mbg-card"><div class="mc-amt">₹1,800</div></div></div>
+              <div class="dialog-scrim"><div class="dialog">
+                <div class="circ" style="background:var(--w-caution-bg)">🤝</div>
+                <div class="sh-title hi">इस बार गारंटी से चूक गए</div>
+                <div class="sh-sub hi">जुलाई में आपकी इंस्टॉल दर 60% रही — गारंटी 70% पर मिलती है। आपकी ₹1,800 इंस्टॉल कमाई पूरी तरह सुरक्षित है और वॉलेट में है।<br><br>अगस्त में फिर पूरा मौका — हम आपके साथ हैं।</div>
+                <button class="w-cta hi" style="margin-top:16px">अगस्त की तैयारी देखें</button>
+                <button class="w-cta ghost hi">ठीक है</button>
+              </div></div>
+            </div>
+          </div></div>
+          <div class="caption">Cliff miss — honest, no-blame, forward-looking</div>
+        </div>
+      </div>
+    </div>
+    <div class="note"><b>The cliff, handled:</b> Case C earns ~36% of Case B's payout for 60% of the work — correct by design, explosive in a wallet. The mitigation is sequencing: the Stage-6 nudge fires <i>before</i> the cliff so a miss is rarely a surprise, and this dialog never lets the miss read as punishment. "<span class="hi">हम आपके साथ हैं</span>" (we're with you) closes the loop on the Wiom way.</div>
+  </div>
+
+  <!-- ===================== STAGE 9 ===================== -->
+  <div class="section" id="s9">
+    <div class="section-head"><div class="kicker">Stage 9 · Settlement</div><h2>The 14-day maturity tail</h2><p class="sub">A cohort doesn't fully resolve until ~14 days after month-end (the maturity window). The app must set this expectation so "where's my money?" never becomes a support ticket.</p></div>
+    <div class="stage">
+      <div class="explain">
+        <div class="meta">
+          <span class="mtag trigger">Trigger: month ends, cohort still maturing</span>
+          <span class="mtag chan">Info banner + wallet "pending" row</span>
+          <span class="mtag tone-ok">Tone: clear, reassuring</span>
+        </div>
+        <ul>
+          <li>An <b>info banner</b> states plainly that the guarantee amount is being calculated and will land within 14 days — the same wording used at opt-in, so there's no surprise.</li>
+          <li>The <b>wallet</b> shows a <b>pending row</b> for the MBG top-up (reusing the existing ledger pattern), with the expected credit date — so the CSP sees it's accounted for, not forgotten.</li>
+          <li>On credit, a <b>success toast</b> + the celebration dialog (Stage 8) fire together.</li>
+        </ul>
+        <div class="why"><b>Why pre-empt this:</b> the maturity tail is an open settlement item in the MBG spec. A silent 14-day gap between "month ended" and "money arrived" is exactly where trust erodes. Naming the date converts a worry into a countdown.</div>
+        <div class="copybox">
+          <div class="ch">Copy</div>
+          <div class="copyrow"><div class="k">Banner</div><div class="v"><span class="hi">जुलाई की गारंटी का हिसाब हो रहा है</span></div></div>
+          <div class="copyrow"><div class="k">Wallet row</div><div class="v"><span class="hi">MBG टॉप-अप · 14 जुलाई तक आएगा · प्रक्रिया में</span></div></div>
+        </div>
+      </div>
+      <div class="phone-wrap">
+        <div class="phone"><div class="screen">
+          <div class="w-header"><span class="menu">☰</span><span class="title hi">वॉलेट</span><span class="ic"></span></div>
+          <div class="w-body"><div class="w-scroll">
+            <div class="w-card" style="background:var(--w-secondary);border-color:transparent">
+              <div class="cb" style="color:#cdbfe0">कुल बैलेंस</div>
+              <div style="font-size:30px;font-weight:700;color:#fff">₹2,400</div>
+            </div>
+            <div class="w-banner info"><div class="accent"></div><div class="bbody"><span class="bi">⏳</span><div><div class="bt hi">जुलाई की गारंटी का हिसाब हो रहा है</div><div class="bs hi">₹2,600 टॉप-अप 14 जुलाई तक वॉलेट में आएगा।</div></div></div></div>
+            <div class="w-card"><div class="ct hi" style="display:flex;justify-content:space-between">MBG टॉप-अप <span style="color:var(--w-caution)">प्रक्रिया में</span></div><div class="cb hi">+ ₹2,600 · 14 जुलाई तक</div></div>
+            <div class="w-card"><div class="ct hi" style="display:flex;justify-content:space-between">इंस्टॉल कमाई #4471 <span style="color:var(--w-pos)">+ ₹300</span></div><div class="cb hi">8 जुलाई</div></div>
+            <div class="w-card"><div class="ct hi" style="display:flex;justify-content:space-between">इंस्टॉल कमाई #4468 <span style="color:var(--w-pos)">+ ₹300</span></div><div class="cb hi">7 जुलाई</div></div>
+          </div></div>
+        </div></div>
+        <div class="caption">Wallet — pending MBG top-up with credit date</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== STAGE 10 ===================== -->
+  <div class="section" id="s10">
+    <div class="section-head"><div class="kicker">Stage 10 · Sunset & hand-off</div><h2>30 September — the bridge closes, the ladder opens</h2><p class="sub">The most strategically important screen. A clean, pre-announced sunset is what separates MBG from the Ola-2017 trap. The CSP is handed to the Earned-Flow Ladder — the persistence rail that was running in parallel all along.</p></div>
+    <div class="stage">
+      <div class="explain">
+        <div class="meta">
+          <span class="mtag trigger">Trigger: approaching / reaching 30 Sep</span>
+          <span class="mtag chan">Countdown banner → sunset sheet → Ladder intro</span>
+          <span class="mtag tone-ok">Tone: graduation, not loss</span>
+        </div>
+        <ul>
+          <li><b>Pre-announced, not abrupt.</b> From mid-September a banner counts the scheme down — the temporariness promised at opt-in is now visibly kept.</li>
+          <li>The <b>sunset sheet</b> reframes the end as a graduation: the CSP has built capacity; now the <b>Earned-Flow Ladder</b> rewards it — better work earns more lead priority. No removal cliff, because the ladder was always there.</li>
+          <li>The MBG card is replaced (not deleted) by the <b>Ladder status card</b>, so the home screen never loses its earnings surface.</li>
+        </ul>
+        <div class="why"><b>Why this matters most:</b> the Cold Start floor is <i>persistence</i> — MBG only counts as success if behaviour survives its removal. Framing the sunset as "you've earned your place on the ladder" is the in-app moment that makes the igniter hand off to the sustainer instead of ending in a Rapido-style backlash.</div>
+        <div class="copybox">
+          <div class="ch">Copy</div>
+          <div class="copyrow"><div class="k">Countdown</div><div class="v"><span class="hi">MBG 30 सितंबर को पूरा होगा · 8 दिन बाकी</span></div></div>
+          <div class="copyrow"><div class="k">Sunset H1</div><div class="v"><span class="hi">आपने अपनी जगह बना ली 🎯</span></div></div>
+          <div class="copyrow"><div class="k">Hand-off</div><div class="v"><span class="hi">अब "अर्न्ड-फ्लो" से कमाई जारी रखें — जितना अच्छा काम, उतनी ज़्यादा लीड।</span></div></div>
+        </div>
+      </div>
+      <div class="phone-wrap">
+        <div class="phone"><div class="screen">
+          <div class="w-header"><span class="menu">☰</span><span class="title hi">होम</span><span class="ic">🔔</span></div>
+          <div class="w-body"><div class="w-scroll" style="filter:blur(1.5px)">
+            <div class="w-banner info"><div class="accent"></div><div class="bbody"><span class="bi">🏁</span><div><div class="bt hi">MBG 30 सितंबर को पूरा होगा · 8 दिन बाकी</div></div></div></div>
+          </div>
+          <div class="sheet-scrim"><div class="sheet">
+            <div class="circ ok">🎯</div>
+            <div class="sh-title hi">आपने अपनी जगह बना ली</div>
+            <div class="sh-sub hi">3 महीने में आपने मज़बूत क्षमता बनाई। अब गारंटी की ज़रूरत नहीं — आपकी मेहनत खुद आगे ले जाएगी।</div>
+            <div class="compact">
+              <div class="crow"><span class="ci">🪜</span><span class="cw hi"><b>अर्न्ड-फ्लो लैडर:</b> जितनी अच्छी इंस्टॉल दर, उतनी ज़्यादा और पक्की लीड</span></div>
+              <div class="crow"><span class="ci">📈</span><span class="cw hi">आप अभी <b>सिल्वर</b> पर हैं — गोल्ड पर और ज़्यादा लीड प्राथमिकता</span></div>
+            </div>
+            <button class="w-cta hi">लैडर देखें</button>
+            <button class="w-cta ghost hi">बाद में</button>
+          </div></div>
+          </div>
+        </div></div>
+        <div class="caption">Sunset — graduation to the Earned-Flow Ladder</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== CHANNEL MATRIX ===================== -->
+  <div class="section">
+    <div class="section-head"><div class="kicker">Reference</div><h2>Channel matrix — message → surface → existing component</h2><p class="sub">Every message in the journey reuses a component the app already ships. Nothing here requires a new UI primitive — only new <code>BannerData</code>, chip, and sheet content (server-driven) plus one new MBG drilldown screen.</p></div>
+    <table class="grid">
+      <thead><tr><th>Stage</th><th>Surface</th><th>Existing component</th><th>State / tone</th></tr></thead>
+      <tbody>
+        <tr><td>1 · Awareness</td><td>Push → home banner → info sheet</td><td><code>CleverTap in-app</code> · <code>WiomBanner</code> · <code>WiomConfirmBottomSheet</code></td><td><span class="badge b-info">INFO</span></td></tr>
+        <tr><td>2 · Opt-in</td><td>Compact sheet → confirm → toast</td><td><code>WiomConfirmBottomSheet</code> · <code>WiomToast</code></td><td><span class="badge b-brand">brand</span></td></tr>
+        <tr><td>3 · Activated</td><td>Home MBG card + assurance chip + toast</td><td>New <code>MbgCard</code> (card pattern) · <code>AssuranceChip</code> · <code>WiomToast</code></td><td><span class="badge b-ok">success</span></td></tr>
+        <tr><td>4 · Day-to-day</td><td>MBG card (live) → MBG drilldown</td><td><code>MbgCard</code> · new drilldown in home graph (like <code>EarningsDrilldown</code>)</td><td><span class="badge b-ok">neutral</span></td></tr>
+        <tr><td>5 · On-track</td><td>Success banner + card (A / B states)</td><td><code>WiomBanner</code> (positive) · <code>MbgCard</code></td><td><span class="badge b-ok">positive</span></td></tr>
+        <tr><td>6 · At-risk</td><td>Caution banner + chip warning + push + nudge sheet</td><td><code>WiomBanner</code> (WARNING) · <code>AssuranceChip.bonusAtRisk</code> · CleverTap</td><td><span class="badge b-warn">caution</span></td></tr>
+        <tr><td>7 · Param failing</td><td>Parameter-specific banner + drilldown reason rows</td><td><code>WiomBanner</code> (INFO/WARNING) · <code>TaskCard</code> (maturity)</td><td><span class="badge b-warn">caution</span> / <span class="badge b-info">N/A</span></td></tr>
+        <tr><td>8 · Outcome</td><td>Celebration / miss dialog</td><td><code>InstallationCreditDialog</code> pattern (window-level)</td><td><span class="badge b-ok">celebrate</span> / <span class="badge b-warn">care</span></td></tr>
+        <tr><td>9 · Settlement</td><td>Info banner + wallet pending row</td><td><code>WiomBanner</code> · wallet ledger row</td><td><span class="badge b-info">pending</span></td></tr>
+        <tr><td>10 · Sunset</td><td>Countdown banner → sunset sheet → Ladder card</td><td><code>WiomBanner</code> · <code>WiomConfirmBottomSheet</code> · new <code>LadderCard</code></td><td><span class="badge b-ok">graduation</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===================== BUILD NOTES ===================== -->
+  <div class="section">
+    <div class="section-head"><div class="kicker">For engineering</div><h2>What's new vs. reused</h2></div>
+    <div class="two">
+      <div class="w-card" style="background:#fff">
+        <h3>Reused as-is (server-driven content only)</h3>
+        <ul class="explain" style="margin-top:8px">
+          <li><code>WiomBanner</code> — all banners are new <code>BannerData</code> rows (severity + <code>textKeyHi</code> + <code>tapAction</code>), no code change.</li>
+          <li><code>AssuranceChip</code> — the "<span class="hi">गारंटी</span>" chip uses existing <code>STATE</code>/<code>CURRENCY</code> types and the <code>bonusAtRisk</code> flag.</li>
+          <li><code>WiomConfirmBottomSheet</code> / <code>WiomToast</code> — info, compact, sunset sheets and all toasts.</li>
+          <li><code>InstallationCreditDialog</code> — payout & miss dialogs (new tone + copy keys).</li>
+          <li>CleverTap pipeline — pushes route via <code>PendingRouteBus</code> → new <code>CtPageName.MBG_DRILLDOWN</code>.</li>
+        </ul>
+      </div>
+      <div class="w-card" style="background:#fff">
+        <h3>New to build</h3>
+        <ul class="explain" style="margin-top:8px">
+          <li><b><code>MbgCard</code></b> — home hero card: gauge (gate-track), 3 stats, projection. Schema-driven per the app's rendering rules.</li>
+          <li><b>MBG drilldown screen</b> — in the home nav graph, sibling to the earnings drilldown: per-lead status, 14-day maturity clocks, "how it's calculated".</li>
+          <li><b>New label file</b> — <code>mbg_labels_v1_hi_en.json</code> (all keys above), loaded via <code>WiomLabels</code>.</li>
+          <li><b><code>LadderCard</code></b> — Stage-10 replacement surface (can ship later; MBG card degrades to a "completed" state until then).</li>
+          <li>Backend: cohort/rate/projection fields on the home payload; pending-payout ledger row.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="note"><b>Open items inherited from the MBG spec</b> that the UI is built to absorb without rework: (1) gate boundary — copy says "70% <span class="hi">या उससे ज़्यादा</span>" so ≥ vs &gt; is a config flip; (2) pro-ration for mid-month sign-ups — the card reads the floor from the payload, never hardcodes ₹5,000; (3) settlement date — Stage 9 banner/row take the date from the server, not a constant.</div>
+  </div>
+
+  <p class="fine">Mockups render the real Wiom design tokens (brand <code style="color:var(--magenta)">#D9008D</code>, deep-purple header <code style="color:var(--magenta)">#443152</code>, Noto Sans Devanagari, 4dp grid, semantic state colours). Copy is illustrative Hindi-first draft for review — final strings go through the Copy Agent and the Annu-Bhaiya comprehension test. Payout logic, ₹ figures, and the 70% gate are sourced from the locked MBG v1 spec; all amounts are examples. Communication framing follows the Cold Start analysis (sunset discipline, demand-team ownership of volume shortfalls, persistence hand-off to the Earned-Flow Ladder).</p>
+
+</div>
+</body>
+</html>
