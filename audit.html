@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>नेटबॉक्स माफ़ी ऑडिट — Wiom</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand:#D9008D; --brand100:#FFE5F6; --brand200:#FFCCED;
+  --secondary:#443152;
+  --n900:#161021; --n700:#665E75; --n500:#A7A1B2; --n300:#D7D3E0; --n200:#E8E4F0; --n100:#F1EDF7; --white:#FAF9FC;
+  --green:#008043; --green100:#E1FAED; --green200:#C9F0DD;
+  --warn:#FF8000; --warn200:#FFE6CC;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{
+  font-family:'Noto Sans Devanagari',sans-serif;
+  background:#2a2336;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:26px 14px 50px;
+}
+.pagehead{color:#cfc7dd;text-align:center;margin-bottom:18px;}
+.pagehead h1{font-size:16px;color:#fff;font-weight:700;}
+
+.phone{width:380px;max-width:96vw;height:770px;background:var(--white);border-radius:38px;border:11px solid #0c0814;position:relative;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.5);}
+.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:140px;height:26px;background:#0c0814;border-radius:0 0 16px 16px;z-index:50;}
+.statusbar{height:40px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 22px 5px;font-size:12px;font-weight:600;color:var(--n900);}
+.screen{position:absolute;inset:0;top:40px;display:none;flex-direction:column;overflow-y:auto;padding-bottom:104px;}
+.screen.active{display:flex;}
+.screen::-webkit-scrollbar{width:0;}
+
+.appbar{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--n200);}
+.appbar .logo{font-weight:900;font-size:20px;color:var(--brand);}
+.appbar .ttl{font-size:15px;font-weight:800;color:var(--n900);}
+
+.body{flex:1;padding:24px 22px 0;}
+.kicker{font-size:14px;font-weight:800;color:var(--brand);}
+.head{font-size:26px;font-weight:900;line-height:1.2;letter-spacing:-.3px;margin-top:6px;color:var(--n900);}
+.sub{font-size:14px;color:var(--n700);font-weight:600;line-height:1.5;margin-top:10px;}
+
+.field{margin-top:18px;}
+.field .lab{font-size:13px;font-weight:800;color:var(--n700);margin-bottom:7px;}
+.field .val{background:var(--n100);border:2px solid var(--n200);border-radius:14px;padding:15px 16px;font-size:16px;font-weight:700;color:var(--n900);display:flex;justify-content:space-between;align-items:center;}
+.field .val .chk{color:var(--green);font-weight:900;}
+
+.upload{margin-top:18px;border:2px dashed var(--brand200);background:var(--brand100);border-radius:16px;padding:24px;text-align:center;cursor:pointer;transition:.15s;}
+.upload:active{transform:scale(.99);}
+.upload.done{border-style:solid;border-color:var(--green);background:var(--green100);}
+.upload .ic{font-size:34px;}
+.upload .tx{font-size:15px;font-weight:800;color:var(--secondary);margin-top:8px;}
+.upload.done .tx{color:var(--green);}
+
+.confirm{display:flex;gap:12px;align-items:flex-start;margin-top:20px;padding:14px;border-radius:14px;background:var(--white);border:2px solid var(--n200);cursor:pointer;}
+.confirm.on{border-color:var(--green);background:var(--green100);}
+.confirm .box{width:24px;height:24px;border-radius:7px;border:2px solid var(--n300);flex:none;display:grid;place-items:center;font-size:15px;color:#fff;font-weight:900;}
+.confirm.on .box{background:var(--green);border-color:var(--green);}
+.confirm .tx{font-size:14px;font-weight:700;color:var(--n900);line-height:1.4;}
+
+.ctabar{position:absolute;bottom:0;left:0;right:0;padding:16px 20px 22px;background:linear-gradient(to top,var(--white) 70%,rgba(250,249,252,0));z-index:30;}
+.btn{display:block;width:100%;padding:18px;border-radius:16px;border:none;font-family:inherit;font-size:18px;font-weight:800;cursor:pointer;transition:.15s;}
+.btn-primary{background:var(--brand);color:#fff;box-shadow:0 8px 22px rgba(217,0,141,.35);}
+.btn-primary:active{transform:scale(.98);}
+.btn-primary:disabled{background:var(--n300);color:var(--white);box-shadow:none;cursor:default;}
+
+/* success */
+.done{flex:1;background:linear-gradient(168deg,#16331f,#0c5a36 60%,#008043);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;}
+.tick{width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.16);border:2px solid rgba(255,255,255,.42);display:grid;place-items:center;font-size:58px;margin-bottom:26px;}
+.done h1{font-size:34px;font-weight:900;line-height:1.15;}
+.done p{font-size:16px;color:#d8f3e4;margin-top:14px;line-height:1.5;}
+.btn-light{background:#fff;color:var(--green);box-shadow:0 10px 26px rgba(0,0,0,.28);}
+</style>
+</head>
+<body>
+
+<div class="pagehead"><h1>📋 नेटबॉक्स माफ़ी ऑडिट</h1></div>
+
+<div class="phone">
+  <div class="notch"></div>
+  <div class="statusbar"><span>9:41</span><span>5G ▰▰▰▱ 84%</span></div>
+
+  <!-- FORM -->
+  <section class="screen active" id="form">
+    <div class="appbar"><span class="logo">wiom</span><span class="ttl">नेटबॉक्स माफ़ी ऑडिट</span></div>
+    <div class="body">
+      <div class="kicker">एक बार का छोटा कदम</div>
+      <div class="head">अपने नेटबॉक्स की जानकारी जाँचें।</div>
+      <div class="sub">नीचे दी गई जानकारी सही है या नहीं, यह पक्का करें और नेटबॉक्स की फ़ोटो जमा करें।</div>
+
+      <div class="field">
+        <div class="lab">नेटबॉक्स ID</div>
+        <div class="val">WIOM-NB-48217 <span class="chk">✓</span></div>
+      </div>
+      <div class="field">
+        <div class="lab">लोकेशन</div>
+        <div class="val">सेक्टर 12, इंदौर <span class="chk">✓</span></div>
+      </div>
+
+      <div class="upload" id="upl" onclick="upload()">
+        <div class="ic" id="uplic">📷</div>
+        <div class="tx" id="upltx">नेटबॉक्स की फ़ोटो अपलोड करें</div>
+      </div>
+
+      <div class="confirm" id="conf" onclick="toggleConf()">
+        <div class="box" id="confbox"></div>
+        <div class="tx">मैंने ऊपर दी गई सारी जानकारी जाँच ली है और यह सही है।</div>
+      </div>
+    </div>
+    <div class="ctabar"><button class="btn btn-primary" id="submit" onclick="submit()" disabled>ऑडिट जमा करें</button></div>
+  </section>
+
+  <!-- SUCCESS -->
+  <section class="screen" id="ok">
+    <div class="done">
+      <div class="tick">✓</div>
+      <h1>ऑडिट जमा हो गया!</h1>
+      <p>आपका ऑडिट जाँच के लिए भेज दिया गया है।<br>अब ऐप पर वापस जाकर<br><b>“ऑडिट पूरी कर दी है”</b> पर टैप करें।</p>
+    </div>
+    <div class="ctabar"><button class="btn btn-light" onclick="backToApp()">ऐप पर वापस जाएँ</button></div>
+  </section>
+</div>
+
+<script>
+let uploaded=false, confirmed=false;
+function refresh(){document.getElementById('submit').disabled=!(uploaded&&confirmed);}
+function upload(){
+  uploaded=true;
+  document.getElementById('upl').classList.add('done');
+  document.getElementById('uplic').textContent='✓';
+  document.getElementById('upltx').textContent='फ़ोटो अपलोड हो गई';
+  refresh();
+}
+function toggleConf(){
+  confirmed=!confirmed;
+  const c=document.getElementById('conf');
+  c.classList.toggle('on',confirmed);
+  document.getElementById('confbox').textContent=confirmed?'✓':'';
+  refresh();
+}
+function submit(){
+  try{ localStorage.setItem('wiom_audit_done','1'); }catch(e){}  // tell the app the audit is done
+  document.getElementById('form').classList.remove('active');
+  document.getElementById('ok').classList.add('active');
+}
+function backToApp(){ window.close(); }
+</script>
+</body>
+</html>

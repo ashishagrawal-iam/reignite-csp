@@ -118,13 +118,33 @@ body{
 .pmini i{display:block;height:100%;background:var(--green);border-radius:999px;}
 .calm{text-align:center;font-size:14px;color:var(--n500);font-weight:600;margin-top:22px;padding:0 30px;}
 
-.navhint{display:flex;gap:8px;margin-top:16px;}
+/* ---- FLOW 2: AUDIT ---- */
+.infobox{background:var(--warn200);border:2px solid #FFD9B3;border-radius:20px;padding:20px;margin-top:24px;}
+.infobox .it{font-size:16px;font-weight:800;color:#8a4a00;}
+.infobox .ib{font-size:15px;color:#8a4a00;font-weight:600;line-height:1.55;margin-top:8px;}
+.spin{width:66px;height:66px;border-radius:50%;border:6px solid var(--n200);border-top-color:var(--brand);animation:spin 1s linear infinite;margin:0 auto;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.pendmsg{font-size:14px;font-weight:700;color:var(--warn);text-align:center;margin-top:16px;min-height:18px;line-height:1.4;padding:0 10px;}
+
+.navhint{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:16px;max-width:380px;}
 .navhint button{background:#3a3148;color:#cfc7dd;border:1px solid #4a4159;border-radius:10px;padding:9px 14px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;}
+
+.flowtabs{display:flex;gap:10px;width:380px;max-width:96vw;margin-bottom:16px;}
+.ftab{flex:1;background:#3a3148;color:#cfc7dd;border:1.5px solid #4a4159;border-radius:14px;padding:11px 12px;font-family:inherit;cursor:pointer;text-align:center;transition:.15s;display:flex;flex-direction:column;gap:3px;}
+.ftab b{font-size:15px;font-weight:800;}
+.ftab span{font-size:11.5px;font-weight:600;opacity:.78;}
+.ftab.active{background:var(--brand);color:#fff;border-color:var(--brand);box-shadow:0 8px 22px rgba(217,0,141,.35);}
+.ftab.active span{opacity:.95;}
 </style>
 </head>
 <body>
 
 <div class="pagehead"><h1>🔥 Reignite · CSP App</h1></div>
+
+<div class="flowtabs">
+  <button class="ftab active" id="ft1" onclick="selectFlow(1)"><b>Flow 1</b><span>Eligible + Audit done</span></button>
+  <button class="ftab" id="ft2" onclick="selectFlow(2)"><b>Flow 2</b><span>Eligible + Audit pending</span></button>
+</div>
 
 <div class="phone">
   <div class="notch"></div>
@@ -227,23 +247,53 @@ body{
     <div class="calm">कुछ नया होगा, तभी दिखेगा।<br>रोज़ की टोका-टाकी नहीं।</div>
     <div class="ctabar"><button class="btn btn-line" onclick="restart()">↺ दोबारा देखो</button></div>
   </section>
+
+  <!-- 8 AUDIT REQUIRED (Flow 2) -->
+  <section class="screen" data-s="7">
+    <div class="body">
+      <div style="font-size:54px">📋</div>
+      <div class="kicker" style="margin-top:10px">एक छोटा कदम बाकी है</div>
+      <div class="head" style="font-size:30px">पहले ‘नेटबॉक्स माफ़ी योजना’ पूरी करें।</div>
+      <div class="infobox">
+        <div class="it">⚠️ ऑडिट अभी बाकी है</div>
+        <div class="ib">अपने नेटबॉक्स की जानकारी जाँचें और ऑडिट पूरा करें। यह एक बार का छोटा कदम है।</div>
+      </div>
+    </div>
+    <div class="ctabar"><button class="btn btn-primary" onclick="submitAudit()">ऑडिट पूरा करें</button></div>
+  </section>
+
+  <!-- 9 AUDIT UNDER PROCESS (Flow 2) -->
+  <section class="screen" data-s="8">
+    <div class="gwrap">
+      <div class="spin"></div>
+      <div class="head" style="font-size:30px;margin-top:26px">आपका ऑडिट प्रोसेस में है।</div>
+      <p style="font-size:17px;color:var(--n700);font-weight:600;margin-top:12px;line-height:1.55">ऑडिट पूरी होते ही<br>गारंटी स्कीम अनलॉक हो जाएगी।</p>
+      <div class="pendmsg" id="pendmsg"></div>
+    </div>
+    <div class="ctabar"><button class="btn btn-primary" onclick="checkAudit()">ऑडिट पूरी कर दी है</button></div>
+  </section>
 </div>
 
 <div class="navhint">
   <button onclick="restart()">↺ Restart</button>
   <button onclick="startQuiz()">Quiz</button>
   <button onclick="go(6)">Home</button>
+  <button onclick="setAudit(true)">✅ Audit done</button>
+  <button onclick="setAudit(false)">⏳ Audit pending</button>
+  <span id="auditState" style="color:#cfc7dd;font-size:12px;align-self:center;margin-left:2px"></span>
 </div>
 
 <script>
-const TOTAL=7; let cur=0;
+const TOTAL=9; let cur=0;
+const AUDIT_URL="audit.html";   // mock नेटबॉक्स माफ़ी ऑडिट form (opens in a separate tab) — swap for the real link later
+let auditDone=true;                        // true = Flow 1 (audit already done) · false = Flow 2 (audit pending)
 const screens=[...document.querySelectorAll('.screen')];
 const dotsWrap=document.getElementById('dots');
 for(let i=0;i<TOTAL;i++)dotsWrap.appendChild(document.createElement('i'));
 const dots=[...dotsWrap.children];
 function render(){screens.forEach(s=>s.classList.toggle('active',+s.dataset.s===cur));dots.forEach((d,i)=>d.classList.toggle('on',i===cur));const sc=screens.find(s=>+s.dataset.s===cur);if(sc)sc.scrollTop=0;}
 function go(n){cur=n;render();}
-function restart(){cur=0;qi=0;render();}
+function restart(){cur=0;qi=0;try{localStorage.removeItem('wiom_audit_done');}catch(e){}render();}
 
 const QUIZ=[
  {q:"नए कनेक्शन ना आए तो क्या मिलेगा?",opts:["सोने का सिक्का","₹10,000 गारंटी","कुछ नहीं","मुफ़्त चाय"],c:1},
@@ -277,7 +327,44 @@ function choose(btn,idx,item){
   setTimeout(()=>btn.classList.remove('wrong'),900);
  }
 }
-function nextQ(){if(qi<QUIZ.length-1){qi++;loadQ();}else{go(5);}}
+function nextQ(){if(qi<QUIZ.length-1){qi++;loadQ();}else{finishQuiz();}}
+
+/* ---- Flow branch after quiz ---- */
+function finishQuiz(){ if(auditDone){ go(5); } else { go(7); } }
+
+/* Flow 2: submit audit -> opens audit form in a new tab + shows "under process" */
+function submitAudit(){ try{localStorage.removeItem('wiom_audit_done');}catch(e){} window.open(AUDIT_URL,'_blank'); go(8); }
+
+/* has the audit been completed? (debug toggle OR actually submitted in the audit tab) */
+function isAuditDone(){ try{ return auditDone || localStorage.getItem('wiom_audit_done')==='1'; }catch(e){ return auditDone; } }
+
+/* Flow 2: user says audit done -> re-check; if cleared, go to success */
+function checkAudit(){
+ const note=document.getElementById('pendmsg');
+ const btn=document.querySelector('[data-s="8"] .btn-primary');
+ const orig=btn.textContent;
+ note.textContent=''; btn.disabled=true; btn.textContent='जाँच रहे हैं…';
+ setTimeout(()=>{
+  btn.disabled=false; btn.textContent=orig;
+  if(isAuditDone()){ go(5); }
+  else{ note.textContent='आपका ऑडिट अभी जाँचा जा रहा है। थोड़ी देर में दोबारा कोशिश करें।'; }
+ },900);
+}
+
+/* Top tabs: pick a scenario and replay it end-to-end from the start */
+function selectFlow(n){
+ auditDone=(n===1);
+ document.getElementById('ft1').classList.toggle('active',n===1);
+ document.getElementById('ft2').classList.toggle('active',n===2);
+ updateAuditLabel();
+ restart();
+}
+
+/* Debug: toggle audit state to demo both flows */
+function setAudit(v){ auditDone=v; updateAuditLabel(); }
+function updateAuditLabel(){ const el=document.getElementById('auditState'); if(el) el.textContent='Audit: '+(auditDone?'DONE ✅':'PENDING ⏳'); }
+
+updateAuditLabel();
 render();
 </script>
 </body>
