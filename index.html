@@ -144,6 +144,7 @@ body{
 <div class="flowtabs">
   <button class="ftab active" id="ft1" onclick="selectFlow(1)"><b>Flow 1</b><span>Eligible + Audit done</span></button>
   <button class="ftab" id="ft2" onclick="selectFlow(2)"><b>Flow 2</b><span>Eligible + Audit pending</span></button>
+  <button class="ftab" id="ft3" onclick="selectFlow(3)"><b>Flow 3</b><span>Enrolled + Feedback</span></button>
 </div>
 
 <div class="phone">
@@ -231,20 +232,9 @@ body{
 
   <!-- 7 HOME -->
   <section class="screen" data-s="6">
-    <div class="appbar"><span class="logo">wiom</span><span class="statepill">🔥 महीना 1</span></div>
-    <div class="action">
-      <div class="big">
-        <div class="n">2 नए कस्टमर</div>
-        <div class="s">आज इंस्टॉल करने हैं</div>
-      </div>
-      <div class="go">→</div>
+    <div class="gwrap">
+      <div class="head" style="font-size:26px">CSP lands on the Home Screen</div>
     </div>
-    <div class="track">
-      <div class="t">इस महीने इंस्टॉल · लक्ष्य 60%</div>
-      <div class="v">9 <small>/ 12</small></div>
-      <div class="pmini"><i style="width:75%"></i></div>
-    </div>
-    <div class="calm">कुछ नया होगा, तभी दिखेगा।<br>रोज़ की टोका-टाकी नहीं।</div>
     <div class="ctabar"><button class="btn btn-line" onclick="restart()">↺ दोबारा देखो</button></div>
   </section>
 
@@ -272,6 +262,42 @@ body{
     </div>
     <div class="ctabar"><button class="btn btn-primary" onclick="checkAudit()">ऑडिट पूरी कर दी है</button></div>
   </section>
+
+  <!-- 10 SENTIMENT (Flow 3) -->
+  <section class="screen" data-s="9">
+    <div style="padding:30px 22px 6px">
+      <div style="font-size:46px">🎉</div>
+      <div class="kicker" style="margin-top:8px">आप स्कीम से जुड़ चुके हैं</div>
+      <div class="head" style="font-size:27px">बधाई हो! आप गारंटी प्रोग्राम में शामिल हैं।</div>
+      <p style="font-size:16px;color:var(--n700);font-weight:700;margin-top:12px">इसे लेकर आप कितने उत्साहित हैं?</p>
+    </div>
+    <div class="opts">
+      <button class="opt" style="font-size:16px;line-height:1.35" onclick="pickSentiment(0)">बहुत उत्साहित हूँ! शुरू करने और नए कनेक्शन का इंतज़ार है।</button>
+      <button class="opt" style="font-size:16px;line-height:1.35" onclick="pickSentiment(1)">मुझे इस प्रोग्राम के बारे में नहीं पता।</button>
+      <button class="opt" style="font-size:16px;line-height:1.35" onclick="pickSentiment(2)">मुझे परवाह नहीं, Wiom ऐसी स्कीमें लाता रहता है।</button>
+      <button class="opt" style="font-size:16px;line-height:1.35" onclick="pickSentiment(3)">मैं समझ गया, पर मेरे कुछ सवाल हैं।</button>
+    </div>
+  </section>
+
+  <!-- 11 SENTIMENT: EXCITED (Flow 3) -->
+  <section class="screen bleed" data-s="10">
+    <div class="done">
+      <div class="tick">🎉</div>
+      <h1 style="font-size:38px;font-weight:900;font-style:italic">बधाइयाँ!</h1>
+      <p style="font-size:22px;color:#fff;font-weight:800;margin-top:12px">अगला कनेक्शन ज़रूर लगायें।</p>
+    </div>
+    <div class="ctabar"><button class="btn btn-primary" onclick="go(6)">सारे काम देखें</button></div>
+  </section>
+
+  <!-- 12 SENTIMENT: TEAM WILL CONNECT (Flow 3) -->
+  <section class="screen" data-s="11">
+    <div class="gwrap">
+      <div style="font-size:60px">📞</div>
+      <div class="head" style="font-size:30px;margin-top:14px">हमारी टीम आपसे जल्द संपर्क करेगी।</div>
+      <p style="font-size:17px;color:var(--n700);font-weight:600;margin-top:12px;line-height:1.55">PTL आपसे जल्द ही बात करेगा<br>और आपके सवालों के जवाब देगा।</p>
+    </div>
+    <div class="ctabar"><button class="btn btn-primary" onclick="go(6)">ठीक है</button></div>
+  </section>
 </div>
 
 <div class="navhint">
@@ -291,7 +317,7 @@ const screens=[...document.querySelectorAll('.screen')];
 const dotsWrap=document.getElementById('dots');
 for(let i=0;i<TOTAL;i++)dotsWrap.appendChild(document.createElement('i'));
 const dots=[...dotsWrap.children];
-function render(){screens.forEach(s=>s.classList.toggle('active',+s.dataset.s===cur));dots.forEach((d,i)=>d.classList.toggle('on',i===cur));const sc=screens.find(s=>+s.dataset.s===cur);if(sc)sc.scrollTop=0;}
+function render(){screens.forEach(s=>s.classList.toggle('active',+s.dataset.s===cur));dots.forEach((d,i)=>d.classList.toggle('on',i===cur));dotsWrap.style.display=(cur>=9)?'none':'flex';const sc=screens.find(s=>+s.dataset.s===cur);if(sc)sc.scrollTop=0;}
 function go(n){cur=n;render();}
 function restart(){cur=0;qi=0;try{localStorage.removeItem('wiom_audit_done');}catch(e){}render();}
 
@@ -353,12 +379,17 @@ function checkAudit(){
 
 /* Top tabs: pick a scenario and replay it end-to-end from the start */
 function selectFlow(n){
- auditDone=(n===1);
  document.getElementById('ft1').classList.toggle('active',n===1);
  document.getElementById('ft2').classList.toggle('active',n===2);
+ document.getElementById('ft3').classList.toggle('active',n===3);
+ if(n===3){ qi=0; try{localStorage.removeItem('wiom_audit_done');}catch(e){} go(9); return; }
+ auditDone=(n===1);
  updateAuditLabel();
  restart();
 }
+
+/* Flow 3: post-enrollment sentiment -> excited (0) vs needs-a-call (1,2,3) */
+function pickSentiment(idx){ go(idx===0 ? 10 : 11); }
 
 /* Debug: toggle audit state to demo both flows */
 function setAudit(v){ auditDone=v; updateAuditLabel(); }
