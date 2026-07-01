@@ -126,6 +126,28 @@ body{
 @keyframes spin{to{transform:rotate(360deg);}}
 .pendmsg{font-size:14px;font-weight:700;color:var(--warn);text-align:center;margin-top:16px;min-height:18px;line-height:1.4;padding:0 10px;}
 
+/* ---- FLOW 3: celebration intro -> quiz morph ---- */
+.f3{transition:background .55s ease;background:linear-gradient(168deg,#8a0a5e 0%,#b8017a 48%,#D9008D 100%);}
+.f3.quiz{background:var(--white);}
+.f3head-wrap{position:absolute;left:0;right:0;padding:0 26px;text-align:center;top:50%;transform:translateY(-50%);z-index:5;
+  transition:top .55s cubic-bezier(.4,0,.2,1),transform .55s cubic-bezier(.4,0,.2,1);}
+.f3.quiz .f3head-wrap{top:22px;transform:translateY(0);}
+.f3emoji{font-size:52px;transition:font-size .55s ease;}
+.f3.quiz .f3emoji{font-size:34px;}
+.f3kicker{font-size:15px;font-weight:800;color:#fff;margin-top:10px;transition:color .55s ease;}
+.f3.quiz .f3kicker{color:var(--brand);}
+.f3head{font-size:31px;font-weight:900;line-height:1.2;letter-spacing:-.3px;color:#fff;margin-top:10px;transition:color .55s ease,font-size .55s ease;}
+.f3.quiz .f3head{font-size:23px;color:var(--n900);}
+.f3body{position:absolute;left:0;right:0;top:182px;bottom:0;overflow-y:auto;padding:0 0 24px;
+  opacity:0;transform:translateY(16px);pointer-events:none;
+  transition:opacity .4s ease .28s,transform .4s ease .28s;}
+.f3.quiz .f3body{opacity:1;transform:translateY(0);pointer-events:auto;}
+.f3body::-webkit-scrollbar{width:0;}
+.f3sub{font-size:16px;font-weight:700;color:var(--n700);text-align:center;padding:0 26px;margin-bottom:2px;}
+.f3introcta{background:transparent;transition:opacity .35s ease,transform .35s ease;}
+.f3introcta .btn-primary{background:#fff;color:var(--brand);box-shadow:0 10px 26px rgba(0,0,0,.28);}
+.f3.quiz .f3introcta{opacity:0;transform:translateY(12px);pointer-events:none;}
+
 .navhint{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:16px;max-width:380px;}
 .navhint button{background:#3a3148;color:#cfc7dd;border:1px solid #4a4159;border-radius:10px;padding:9px 14px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;}
 
@@ -263,20 +285,23 @@ body{
     <div class="ctabar"><button class="btn btn-primary" onclick="checkAudit()">ऑडिट पूरी कर दी है</button></div>
   </section>
 
-  <!-- 10 SENTIMENT (Flow 3) -->
-  <section class="screen" data-s="9">
-    <div style="padding:30px 22px 6px">
-      <div style="font-size:46px">🎉</div>
-      <div class="kicker" style="margin-top:8px">आप स्कीम से जुड़ चुके हैं</div>
-      <div class="head" style="font-size:27px">बधाई हो! आप गारंटी प्रोग्राम में शामिल हैं।</div>
-      <p style="font-size:16px;color:var(--n700);font-weight:700;margin-top:12px">इसे लेकर आप कितने उत्साहित हैं?</p>
+  <!-- 10 SENTIMENT: celebration intro -> quiz morph (Flow 3) -->
+  <section class="screen f3" data-s="9" id="f3">
+    <div class="f3head-wrap">
+      <div class="f3emoji">🎉</div>
+      <div class="f3kicker">आप स्कीम से जुड़ चुके हैं</div>
+      <div class="f3head">बधाई हो! आप गारंटी प्रोग्राम में शामिल हैं।</div>
     </div>
-    <div class="opts">
-      <button class="opt" style="font-size:16px;line-height:1.35" onclick="pickSentiment(0)">बहुत उत्साहित हूँ! शुरू करने और नए कनेक्शन का इंतज़ार है।</button>
-      <button class="opt" style="font-size:16px;line-height:1.35" onclick="pickSentiment(1)">मुझे इस प्रोग्राम के बारे में नहीं पता।</button>
-      <button class="opt" style="font-size:16px;line-height:1.35" onclick="pickSentiment(2)">मुझे परवाह नहीं, Wiom ऐसी स्कीमें लाता रहता है।</button>
-      <button class="opt" style="font-size:16px;line-height:1.35" onclick="pickSentiment(3)">मैं समझ गया, पर मेरे कुछ सवाल हैं।</button>
+    <div class="f3body">
+      <div class="f3sub">इसे लेकर आप कितने उत्साहित हैं?</div>
+      <div class="opts">
+        <button class="opt" style="font-size:16px;line-height:1.35" onclick="pickSentiment(0)">बहुत उत्साहित हूँ! शुरू करने और नए कनेक्शन का इंतज़ार है।</button>
+        <button class="opt" style="font-size:16px;line-height:1.35" onclick="pickSentiment(1)">मुझे इस प्रोग्राम के बारे में नहीं पता।</button>
+        <button class="opt" style="font-size:16px;line-height:1.35" onclick="pickSentiment(2)">मुझे परवाह नहीं, Wiom ऐसी स्कीमें लाता रहता है।</button>
+        <button class="opt" style="font-size:16px;line-height:1.35" onclick="pickSentiment(3)">मैं समझ गया, पर मेरे कुछ सवाल हैं।</button>
+      </div>
     </div>
+    <div class="ctabar f3introcta"><button class="btn btn-primary" onclick="f3go()">क्या आप उत्साहित हैं?</button></div>
   </section>
 
   <!-- 11 SENTIMENT: EXCITED (Flow 3) -->
@@ -382,11 +407,14 @@ function selectFlow(n){
  document.getElementById('ft1').classList.toggle('active',n===1);
  document.getElementById('ft2').classList.toggle('active',n===2);
  document.getElementById('ft3').classList.toggle('active',n===3);
- if(n===3){ qi=0; try{localStorage.removeItem('wiom_audit_done');}catch(e){} go(9); return; }
+ if(n===3){ qi=0; try{localStorage.removeItem('wiom_audit_done');}catch(e){} document.getElementById('f3').classList.remove('quiz'); go(9); return; }
  auditDone=(n===1);
  updateAuditLabel();
  restart();
 }
+
+/* Flow 3: morph the celebration intro into the sentiment quiz */
+function f3go(){ document.getElementById('f3').classList.add('quiz'); }
 
 /* Flow 3: post-enrollment sentiment -> excited (0) vs needs-a-call (1,2,3) */
 function pickSentiment(idx){ go(idx===0 ? 10 : 11); }
